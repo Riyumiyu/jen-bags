@@ -800,6 +800,24 @@ body.locked .status:empty{display:none}
 .undobox .uempty{font:500 15px var(--body);color:#4B5478;padding:14px 4px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .undobox .urow .sn,:root:not([data-theme="light"]) .undobox .uempty{color:#BFC5DD!important}}
 :root[data-theme="dark"] .undobox .urow .sn,:root[data-theme="dark"] .undobox .uempty{color:#BFC5DD!important}
+
+/* Pick several bags */
+.pickbtn{display:block;width:100%;margin:10px 0 6px;padding:12px 16px;border-radius:999px;font:700 15px var(--body);color:var(--fg);background:rgba(255,255,255,.55);border:1.5px dashed rgba(224,33,154,.55);cursor:pointer}
+.pickbtn[aria-pressed="true"]{background:linear-gradient(135deg,#EE3AA4,#A456E3)!important;color:#fff;border:1.5px solid transparent}
+#list li.pickable{cursor:pointer}
+#list li.picked{box-shadow:0 0 0 3px #E0219A,0 10px 24px rgba(224,33,154,.22)!important}
+#list li.nopick{opacity:.45}
+.pick{width:30px;height:30px;accent-color:#E0219A;cursor:pointer;flex:none}
+.pickbar{position:fixed;left:12px;right:12px;bottom:calc(80px + env(safe-area-inset-bottom,0px));z-index:16;display:flex;align-items:center;gap:8px;padding:10px 10px 10px 16px;border-radius:22px;
+ background:rgba(252,252,255,.95);color:#1B2244;border:1px solid rgba(27,34,68,.12);box-shadow:0 14px 34px rgba(27,34,68,.22);font:700 15px/1.3 var(--body);max-width:520px;margin:0 auto}
+.pickbar span{flex:1;min-width:0}
+.pickbar .pbtn{flex:none;white-space:nowrap}
+.pickbar .pbtn[disabled]{opacity:.45;cursor:default}
+body:has(.pickbar:not([hidden])) .wrap{padding-bottom:150px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pickbar{background:rgba(26,31,50,.96);color:#F2F3FA;border-color:rgba(255,255,255,.14)}:root:not([data-theme="light"]) .pickbtn{background:rgba(255,255,255,.08)}}
+:root[data-theme="dark"] .pickbar{background:rgba(26,31,50,.96);color:#F2F3FA;border-color:rgba(255,255,255,.14)}
+:root[data-theme="dark"] .pickbtn{background:rgba(255,255,255,.08)}
+body.locked .pickbar,body.locked .pickbtn{display:none!important}
 </style>
 
 </head>
@@ -859,6 +877,7 @@ body.locked .status:empty{display:none}
     <button id="fRem" aria-pressed="false" data-f="removed">Removed</button>
   </div>
   <label class="sortby" for="sortBy"><span>Sort by</span><select id="sortBy"><option value="num">Bag number</option><option value="low">Price: lowest to highest</option><option value="high">Price: highest to lowest</option></select></label>
+  <button type="button" class="pickbtn" id="pickToggle" aria-pressed="false">Select bags to mark sold</button>
   <label class="hideold" for="hideOld"><input type="checkbox" id="hideOld"><span>Hide bags sold before today <b id="oldCount"></b></span></label>
   <details class="gpwrap" id="gpWrap"><summary>Change prices of a group</summary>
     <p class="cap">Changes every unsold bag with that price. Sold bags stay the same.</p>
@@ -960,6 +979,7 @@ body.locked .status:empty{display:none}
       <p>The page asks for the helper PIN once. Type it and tap <b>Save PIN</b>. Without the PIN, changes stay on that phone only and don't save.</p>
       <h3>Fixing mistakes</h3>
       <ul>
+        <li><b>Sell several bags without scanning:</b> tap <b>Select bags to mark sold</b>, tap each bag the buyer is taking, then tap <b>Mark sold</b> at the bottom. You can still change the prices and pick the payment before saving.</li>
         <li><b>Undo:</b> right after a change, tap <b>Undo</b> in the bar at the bottom. To undo older changes, tap <b>↶ Undo changes</b> under the totals. It lists the last 30 changes made on this phone in the past 3 days, even after you close the site. Undoing one change also undoes the newer ones above it.</li>
         <li><b>Wrong payment:</b> tap <b>Change payment</b> under a sold bag.</li>
         <li><b>Not really sold:</b> untick the box, then tap <b>Yes, unmark</b>.</li>
@@ -989,6 +1009,7 @@ body.locked .status:empty{display:none}
     </div>
   </section>
 </div>
+<div class="pickbar" id="pickBar" hidden role="region" aria-label="Picked bags"><span id="pickText">Tap bags to pick them</span><button type="button" class="pbtn" id="pickClear">Clear</button><button type="button" class="pbtn primary" id="pickGo" disabled>Mark sold</button></div>
 <div class="undobar" id="undoBar" hidden role="status" aria-live="polite"><span id="undoText"></span><button type="button" id="undoBtn">Undo</button><button type="button" id="undoClose" aria-label="Close">×</button></div>
 <div class="zoom" id="zoom" hidden><img id="zoomImg" alt=""></div>
 
@@ -1004,6 +1025,7 @@ BAGS.forEach(b => state[b.id] = {status: "available", price: b.tag, soldAt: null
 const PAYS = ["Cash", "GCash"];
 const CHOICES = ["Cash", "GCash", "Other", "N/A"];
 let filter = "all";
+let pickMode = false; const picked = new Set();
 let panel = null; // {id, type: "sell" | "remove" | "unsell"}
 const online = /^https:\/\/script\.google(usercontent)?\.com\//.test(API_URL);
 const peso = n => "₱" + Math.round(n).toLocaleString("en-PH");
@@ -1252,17 +1274,51 @@ function render(){
       cb.onchange = () => { cb.checked = s.status === "sold"; panel = {id: b.id, type: s.status === "sold" ? "unsell" : "sell"}; render(); };
       ctrl.append(pr, cb);
     }
+    if (pickMode){
+      acts.remove();
+      if (s.status === "available"){
+        const on = picked.has(b.id);
+        li.classList.add("pickable"); if (on) li.classList.add("picked");
+        const pc = el("input", "pick"); pc.type = "checkbox"; pc.checked = on; pc.setAttribute("aria-label", "Pick Bag " + b.n);
+        pc.onchange = () => togglePick(b.id);
+        ctrl.textContent = ""; ctrl.appendChild(pc);
+        li.onclick = e => { if (e.target === pc || e.target.tagName === "IMG") return; togglePick(b.id); };
+      } else { li.classList.add("nopick"); ctrl.textContent = ""; }
+    }
     li.append(img, info, ctrl);
-    if (panel && panel.id === b.id){
+    if (!pickMode && panel && panel.id === b.id){
       const p = panel.type === "sell" ? sellPanel(b, s, false) : panel.type === "edit" ? sellPanel(b, s, true) : panel.type === "remove" ? removePanel(b, s) : unsellPanel(b, s);
       p.classList.add("full"); li.appendChild(p);
     }
     ul.appendChild(li);
   });
+  drawPickBar();
   totals(); renderLog(); if (typeof view !== "undefined" && view === "vStats") renderStats();
   $("addNum").placeholder = String(nextNum());
 }
 
+// ---- Pick several bags, then mark them sold together ----
+function togglePick(id){ if (picked.has(id)) picked.delete(id); else picked.add(id); render(); }
+function setPickMode(on){
+  pickMode = on; panel = null; if (!on) picked.clear();
+  $("pickToggle").setAttribute("aria-pressed", on); $("pickToggle").textContent = on ? "Done picking" : "Select bags to mark sold";
+  if (on && filter !== "left"){ const fb = document.querySelector('.tabs button[data-f="left"]'); if (fb) fb.click(); else render(); } else render();
+}
+function drawPickBar(){
+  const bar = $("pickBar"); if (!bar) return;
+  [...picked].forEach(id => { if (!state[id] || state[id].status !== "available") picked.delete(id); });
+  bar.hidden = !pickMode; if (!pickMode) return;
+  const n = picked.size, tot = [...picked].reduce((a, id) => a + (Number(state[id].price) || 0), 0);
+  $("pickText").textContent = n ? n + (n === 1 ? " bag picked · " : " bags picked · ") + peso(tot) : "Tap bags to pick them";
+  $("pickGo").disabled = !n; $("pickGo").textContent = n > 1 ? "Mark " + n + " sold" : "Mark sold"; $("pickClear").hidden = !n;
+}
+function sellPicked(){
+  const ids = BAGS.filter(b => picked.has(b.id)).sort((a, b) => a.n - b.n).map(b => b.id); if (!ids.length) return;
+  setPickMode(false);
+  openCart("", false);
+  ids.forEach(id => addToCart(id, true)); drawCart();
+  cartMsg(ids.length + (ids.length === 1 ? " bag" : " bags") + " picked. Check the prices, pick the payment, then tap Mark sold.", false, true);
+}
 // ---- Numbering ----
 const nextNum = () => Math.max(0, ...active().map(b => b.n)) + 1;
 // ---- Undo (kept on this phone for 3 days, last 30 changes) ----
@@ -1554,6 +1610,7 @@ function markPaid(on){
 var view = "vBags";
 function setView(v){
   view = v; document.body.dataset.view = v;
+  if (v !== "vBags" && typeof pickMode !== "undefined" && pickMode) setPickMode(false);
   ["vBags", "vStats", "vHelp"].forEach(id => { $(id).hidden = id !== v; });
   document.querySelectorAll(".views button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === v));
   if (v === "vStats") renderStats();
@@ -1663,6 +1720,7 @@ $("pdfBtn").onclick = exportPdf;
 $("paidBtn").onclick = () => markPaid(true); $("unpaidBtn").onclick = () => markPaid(false);
 ["stFrom", "stTo", "stPaid"].forEach(id => $(id).addEventListener("change", renderStats));
 $("stClear").onclick = () => { $("stFrom").value = ""; $("stTo").value = ""; $("stPaid").value = "all"; renderStats(); };
+$("pickToggle").onclick = () => setPickMode(!pickMode); $("pickClear").onclick = () => { picked.clear(); render(); }; $("pickGo").onclick = sellPicked;
 $("undoBtn").onclick = undo; $("undoLast").onclick = openUndoList; undoCount();
 $("undoClose").onclick = () => { $("undoBar").hidden = true; };
 $("pdfDate").value = dayKey(Date.now());
