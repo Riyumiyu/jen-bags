@@ -2047,6 +2047,21 @@ $("pendDrop").onclick = () => dropPending(pendingItems().map(it => it.id));
 window.addEventListener("online", showPending); window.addEventListener("offline", showPending);
 showPending();
 
+// ---- Auto-update: reload when a newer version of the site is published ----
+const APP_V = "2026-11-15-pick2";
+let lastVerCheck = 0;
+async function checkVersion(){
+  if (location.protocol === "file:" || Date.now() - lastVerCheck < 5 * 60e3) return; lastVerCheck = Date.now();
+  try {
+    const h = await fetch(location.pathname, {cache: "no-cache"}).then(r => r.ok ? r.text() : "");
+    const m = h.match(/const APP_V = "([^"]+)"/);
+    if (!m || m[1] === APP_V) return;
+    const go = () => { if (cart || pickMode || panel || queue.length || busy()) return false; location.reload(); return true; };
+    if (!go()){ const t = setInterval(() => { if (go()) clearInterval(t); }, 15000); }
+  } catch(e){}
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkVersion(); });
+setInterval(checkVersion, 10 * 60e3); setTimeout(checkVersion, 20000);
 // ---- Loading screen ----
 const bootAt = Date.now();
 try { const lg = document.querySelector("header .logo"); if (lg) $("bootLogo").src = lg.src; else $("bootLogo").remove(); } catch(e){}
