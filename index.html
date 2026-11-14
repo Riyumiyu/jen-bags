@@ -807,7 +807,9 @@ body.locked .status:empty{display:none}
 #list li.pickable{cursor:pointer}
 #list li.picked{box-shadow:0 0 0 3px #E0219A,0 10px 24px rgba(224,33,154,.22)!important}
 #list li.nopick{opacity:.45}
-.pick{width:30px;height:30px;accent-color:#E0219A;cursor:pointer;flex:none}
+.pick{width:30px;height:30px;accent-color:#E0219A;cursor:pointer;flex:none;margin:0}
+#list li.pickable{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#list li{-webkit-touch-callout:none}
 .pickbar{position:fixed;left:12px;right:12px;bottom:calc(80px + env(safe-area-inset-bottom,0px));z-index:16;display:flex;align-items:center;gap:8px;padding:10px 10px 10px 16px;border-radius:22px;
  background:rgba(252,252,255,.95);color:#1B2244;border:1px solid rgba(27,34,68,.12);box-shadow:0 14px 34px rgba(27,34,68,.22);font:700 15px/1.3 var(--body);max-width:520px;margin:0 auto}
 .pickbar span{flex:1;min-width:0}
@@ -877,7 +879,6 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
     <button id="fRem" aria-pressed="false" data-f="removed">Removed</button>
   </div>
   <label class="sortby" for="sortBy"><span>Sort by</span><select id="sortBy"><option value="num">Bag number</option><option value="low">Price: lowest to highest</option><option value="high">Price: highest to lowest</option></select></label>
-  <button type="button" class="pickbtn" id="pickToggle" aria-pressed="false">Select bags to mark sold</button>
   <label class="hideold" for="hideOld"><input type="checkbox" id="hideOld"><span>Hide bags sold before today <b id="oldCount"></b></span></label>
   <details class="gpwrap" id="gpWrap"><summary>Change prices of a group</summary>
     <p class="cap">Changes every unsold bag with that price. Sold bags stay the same.</p>
@@ -964,9 +965,9 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
       <h3>When a bag sells</h3>
       <ol>
         <li>Find the bag. Scroll, or type its number or name in the search box.</li>
-        <li>If the buyer bargained, type the new price in the ₱ box first.</li>
-        <li>Tick the box on the right.</li>
-        <li>Pick how they paid: Cash, GCash, Other (type it, like Maya), or N/A if you don't know.</li>
+        <li>Tick the box on the right, or press and hold the bag. Tick more bags if the buyer is taking several.</li>
+        <li>Tap <b>Mark sold</b> in the bar at the bottom.</li>
+        <li>If the buyer bargained, change the price. Pick how they paid: Cash, GCash, Other (type it, like Maya), or N/A if you don't know.</li>
         <li>Add a note if you want, like the buyer's name or GCash reference number. Tap <b>Mark sold</b>.</li>
       </ol>
       <h3>Selling with the QR sticker</h3>
@@ -979,7 +980,7 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
       <p>The page asks for the helper PIN once. Type it and tap <b>Save PIN</b>. Without the PIN, changes stay on that phone only and don't save.</p>
       <h3>Fixing mistakes</h3>
       <ul>
-        <li><b>Sell several bags without scanning:</b> tap <b>Select bags to mark sold</b>, tap each bag the buyer is taking, then tap <b>Mark sold</b> at the bottom. You can still change the prices and pick the payment before saving.</li>
+        <li><b>Sell bags without scanning:</b> tap the box on a bag, or press and hold the bag. Then tap any other bags the buyer is taking, and tap <b>Mark sold</b> at the bottom. You can still change the prices and pick the payment before saving. Tap <b>Cancel</b> to stop picking.</li>
         <li><b>Undo:</b> right after a change, tap <b>Undo</b> in the bar at the bottom. To undo older changes, tap <b>↶ Undo changes</b> under the totals. It lists the last 30 changes made on this phone in the past 3 days, even after you close the site. Undoing one change also undoes the newer ones above it.</li>
         <li><b>Wrong payment:</b> tap <b>Change payment</b> under a sold bag.</li>
         <li><b>Not really sold:</b> untick the box, then tap <b>Yes, unmark</b>.</li>
@@ -1009,7 +1010,7 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
     </div>
   </section>
 </div>
-<div class="pickbar" id="pickBar" hidden role="region" aria-label="Picked bags"><span id="pickText">Tap bags to pick them</span><button type="button" class="pbtn" id="pickClear">Clear</button><button type="button" class="pbtn primary" id="pickGo" disabled>Mark sold</button></div>
+<div class="pickbar" id="pickBar" hidden role="region" aria-label="Picked bags"><span id="pickText">Tap bags to pick them</span><button type="button" class="pbtn" id="pickClear">Cancel</button><button type="button" class="pbtn primary" id="pickGo" disabled>Mark sold</button></div>
 <div class="undobar" id="undoBar" hidden role="status" aria-live="polite"><span id="undoText"></span><button type="button" id="undoBtn">Undo</button><button type="button" id="undoClose" aria-label="Close">×</button></div>
 <div class="zoom" id="zoom" hidden><img id="zoomImg" alt=""></div>
 
@@ -1271,7 +1272,7 @@ function render(){
       inp.onchange = () => { const v = Math.max(0, Number(inp.value) || 0); if (v === s.price) return; pushUndo("Changed Bag " + b.n + " price to " + peso(v), [b.id]); s.price = v; commit(b.id); };
       pr.appendChild(inp);
       const cb = el("input", "chk"); cb.type = "checkbox"; cb.id = "s-" + b.id; cb.checked = s.status === "sold"; cb.setAttribute("aria-label", "Bag " + b.n + " sold");
-      cb.onchange = () => { cb.checked = s.status === "sold"; panel = {id: b.id, type: s.status === "sold" ? "unsell" : "sell"}; render(); };
+      cb.onchange = () => { if (s.status === "available"){ startPick(b.id); return; } cb.checked = true; panel = {id: b.id, type: "unsell"}; render(); };
       ctrl.append(pr, cb);
     }
     if (pickMode){
@@ -1285,6 +1286,7 @@ function render(){
         li.onclick = e => { if (e.target === pc || e.target.tagName === "IMG") return; togglePick(b.id); };
       } else { li.classList.add("nopick"); ctrl.textContent = ""; }
     }
+    if (!pickMode && s.status === "available") longPress(li, () => startPick(b.id));
     li.append(img, info, ctrl);
     if (!pickMode && panel && panel.id === b.id){
       const p = panel.type === "sell" ? sellPanel(b, s, false) : panel.type === "edit" ? sellPanel(b, s, true) : panel.type === "remove" ? removePanel(b, s) : unsellPanel(b, s);
@@ -1298,19 +1300,28 @@ function render(){
 }
 
 // ---- Pick several bags, then mark them sold together ----
-function togglePick(id){ if (picked.has(id)) picked.delete(id); else picked.add(id); render(); }
+function togglePick(id){ if (picked.has(id)) picked.delete(id); else picked.add(id); if (!picked.size){ setPickMode(false); return; } render(); }
+function startPick(id){ if (!pickMode){ pickMode = true; panel = null; } picked.add(id); if (navigator.vibrate) navigator.vibrate(30); render(); }
+function longPress(node, fn){
+  let t = null, x = 0, y = 0, fired = false;
+  const cancel = () => { clearTimeout(t); t = null; };
+  node.addEventListener("pointerdown", e => { if (e.button > 0 || e.target.closest("input,button,select,a")) return; fired = false; x = e.clientX; y = e.clientY; cancel(); t = setTimeout(() => { fired = true; t = null; fn(); }, 450); });
+  node.addEventListener("pointermove", e => { if (t && Math.hypot(e.clientX - x, e.clientY - y) > 10) cancel(); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(ev => node.addEventListener(ev, cancel));
+  node.addEventListener("contextmenu", e => { if (fired || t) e.preventDefault(); });
+  node.addEventListener("click", e => { if (fired){ e.preventDefault(); e.stopPropagation(); fired = false; } }, true);
+}
 function setPickMode(on){
   pickMode = on; panel = null; if (!on) picked.clear();
-  $("pickToggle").setAttribute("aria-pressed", on); $("pickToggle").textContent = on ? "Done picking" : "Select bags to mark sold";
-  if (on && filter !== "left"){ const fb = document.querySelector('.tabs button[data-f="left"]'); if (fb) fb.click(); else render(); } else render();
+  render();
 }
 function drawPickBar(){
   const bar = $("pickBar"); if (!bar) return;
   [...picked].forEach(id => { if (!state[id] || state[id].status !== "available") picked.delete(id); });
   bar.hidden = !pickMode; if (!pickMode) return;
   const n = picked.size, tot = [...picked].reduce((a, id) => a + (Number(state[id].price) || 0), 0);
-  $("pickText").textContent = n ? n + (n === 1 ? " bag picked · " : " bags picked · ") + peso(tot) : "Tap bags to pick them";
-  $("pickGo").disabled = !n; $("pickGo").textContent = n > 1 ? "Mark " + n + " sold" : "Mark sold"; $("pickClear").hidden = !n;
+  $("pickText").textContent = n ? n + " picked · " + peso(tot) : "Tap bags to pick them";
+  $("pickGo").disabled = !n; $("pickGo").textContent = n > 1 ? "Mark " + n + " sold" : "Mark sold";
 }
 function sellPicked(){
   const ids = BAGS.filter(b => picked.has(b.id)).sort((a, b) => a.n - b.n).map(b => b.id); if (!ids.length) return;
@@ -1720,7 +1731,7 @@ $("pdfBtn").onclick = exportPdf;
 $("paidBtn").onclick = () => markPaid(true); $("unpaidBtn").onclick = () => markPaid(false);
 ["stFrom", "stTo", "stPaid"].forEach(id => $(id).addEventListener("change", renderStats));
 $("stClear").onclick = () => { $("stFrom").value = ""; $("stTo").value = ""; $("stPaid").value = "all"; renderStats(); };
-$("pickToggle").onclick = () => setPickMode(!pickMode); $("pickClear").onclick = () => { picked.clear(); render(); }; $("pickGo").onclick = sellPicked;
+$("pickClear").onclick = () => setPickMode(false); $("pickGo").onclick = sellPicked;
 $("undoBtn").onclick = undo; $("undoLast").onclick = openUndoList; undoCount();
 $("undoClose").onclick = () => { $("undoBar").hidden = true; };
 $("pdfDate").value = dayKey(Date.now());
