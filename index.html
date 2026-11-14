@@ -791,6 +791,15 @@ body.locked .status:empty{display:none}
 :root[data-theme="dark"] .scanbox .seg button[aria-pressed="true"]{color:#fff}
 :root[data-theme="dark"] .scanbox .fld input::placeholder{color:#9AA2BE}
 :root[data-theme="dark"] .chint,:root[data-theme="dark"] .scanbox .cx{color:#BFC5DD}
+
+/* Undo list */
+.undobox .urow{align-items:center}
+.undobox .urow .cname{font-weight:600}
+.undobox .urow .sn{color:#4B5478!important;font-weight:500!important;margin:2px 0 0!important}
+.undobox .urow .pbtn{flex:none;white-space:nowrap}
+.undobox .uempty{font:500 15px var(--body);color:#4B5478;padding:14px 4px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .undobox .urow .sn,:root:not([data-theme="light"]) .undobox .uempty{color:#BFC5DD!important}}
+:root[data-theme="dark"] .undobox .urow .sn,:root[data-theme="dark"] .undobox .uempty{color:#BFC5DD!important}
 </style>
 
 </head>
@@ -951,7 +960,7 @@ body.locked .status:empty{display:none}
       <p>The page asks for the helper PIN once. Type it and tap <b>Save PIN</b>. Without the PIN, changes stay on that phone only and don't save.</p>
       <h3>Fixing mistakes</h3>
       <ul>
-        <li><b>Undo:</b> after any change, tap <b>Undo</b> in the bar at the bottom, or <b>↶ Undo last change</b> under the totals.</li>
+        <li><b>Undo:</b> right after a change, tap <b>Undo</b> in the bar at the bottom. To undo older changes, tap <b>↶ Undo changes</b> under the totals. It lists the last 30 changes made on this phone in the past 3 days, even after you close the site. Undoing one change also undoes the newer ones above it.</li>
         <li><b>Wrong payment:</b> tap <b>Change payment</b> under a sold bag.</li>
         <li><b>Not really sold:</b> untick the box, then tap <b>Yes, unmark</b>.</li>
       </ul>
@@ -1256,38 +1265,86 @@ function render(){
 
 // ---- Numbering ----
 const nextNum = () => Math.max(0, ...active().map(b => b.n)) + 1;
-// ---- Undo ----
-const undoStack = [];
+// ---- Undo (kept on this phone for 3 days, last 30 changes) ----
+const UNDO_KEEP = 3 * 864e5;
+let undoStack = [];
+try { undoStack = (JSON.parse(localStorage.getItem("jb_undo") || "[]") || []).filter(u => u && u.items && Date.now() - (u.at || 0) < UNDO_KEEP); } catch(e){ undoStack = []; }
 let undoTimer;
+function saveUndo(){
+  try { LSset("jb_undo", JSON.stringify(undoStack.map(u => ({...u, items: u.items.map(it => it.bag ? {...it, bag: {...it.bag, img: undefined}} : it)})))); } catch(e){}
+}
+function undoCount(){ $("undoLast").hidden = !undoStack.length; $("undoLast").textContent = undoStack.length > 1 ? "↶ Undo changes (" + undoStack.length + ")" : "↶ Undo last change"; }
 function pushUndo(label, ids){
-  undoStack.push({label, items: ids.map(id => { const b = bagOf(id); return b ? {id, existed: true, bag: {...b}, st: {...state[id]}} : {id, existed: false}; })});
+  undoStack.push({label, at: Date.now(), items: ids.map(id => { const b = bagOf(id); return b ? {id, existed: true, bag: {...b}, st: {...state[id]}} : {id, existed: false}; })});
   if (undoStack.length > 30) undoStack.shift();
-  showUndo(label);
+  saveUndo(); showUndo(label);
 }
 function showUndo(label){
-  $("undoText").textContent = label; $("undoBtn").hidden = false; $("undoBar").hidden = false; $("undoLast").hidden = !undoStack.length;
+  $("undoText").textContent = label; $("undoBtn").hidden = false; $("undoBar").hidden = false; undoCount();
   clearTimeout(undoTimer); undoTimer = setTimeout(() => { $("undoBar").hidden = true; }, 9000);
 }
+function undoSteps(k){
+  const done = [], saveIds = new Set();
+  for (let n = 0; n < k && undoStack.length; n++){
+    const u = undoStack.pop(); done.push(u.label);
+    u.items.forEach(it => {
+      if (!it.existed){
+        const i = BAGS.findIndex(b => b.id === it.id);
+        if (i >= 0){ BAGS.splice(i, 1); delete state[it.id]; saveIds.delete(it.id); if (online) enqueue({action: "delete", id: it.id}); }
+        return;
+      }
+      let b = bagOf(it.id);
+      if (!b){ b = {...it.bag}; if (!b.img) delete b.img; BAGS.push(b); } else { const keep = b.img; Object.assign(b, it.bag); if (!it.bag.img) b.img = keep; }
+      state[it.id] = {...it.st};
+      saveIds.add(it.id);
+    });
+  }
+  saveUndo(); panel = null; saveLocal(); render();
+  if (online && saveIds.size) enqueue({action: "batch", ids: [...saveIds]});
+  return done;
+}
 function undo(){
-  const u = undoStack.pop(); if (!u){ $("undoBar").hidden = true; return; }
-  const saveIds = [];
-  u.items.forEach(it => {
-    if (!it.existed){
-      const i = BAGS.findIndex(b => b.id === it.id);
-      if (i >= 0){ BAGS.splice(i, 1); delete state[it.id]; if (online) enqueue({action: "delete", id: it.id}); }
-      return;
-    }
-    let b = bagOf(it.id);
-    if (!b){ b = {...it.bag}; BAGS.push(b); } else Object.assign(b, it.bag);
-    state[it.id] = {...it.st};
-    saveIds.push(it.id);
-  });
-  panel = null; saveLocal(); render();
-  if (online && saveIds.length) enqueue({action: "batch", ids: saveIds});
+  if (!undoStack.length){ $("undoBar").hidden = true; return; }
+  const done = undoSteps(1);
   clearTimeout(undoTimer);
-  $("undoText").textContent = "Undid: " + u.label; $("undoBar").hidden = false; $("undoLast").hidden = !undoStack.length;
+  $("undoText").textContent = "Undid: " + done[0]; $("undoBar").hidden = false; undoCount();
   $("undoBtn").hidden = !undoStack.length;
   undoTimer = setTimeout(() => { $("undoBar").hidden = true; $("undoBtn").hidden = false; }, 5000);
+}
+function whenText(t){
+  const d = new Date(t), now = new Date(), tm = d.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"});
+  if (d.toDateString() === now.toDateString()) return "Today, " + tm;
+  const y = new Date(now); y.setDate(now.getDate() - 1);
+  return (d.toDateString() === y.toDateString() ? "Yesterday, " : d.toLocaleDateString([], {month: "short", day: "numeric"}) + ", ") + tm;
+}
+function openUndoList(){
+  closeCart();
+  const wrap = el("div", "scanwrap"); wrap.id = "undoWrap";
+  const box = el("div", "scanbox undobox"); box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "Undo changes"); wrap.appendChild(box);
+  const top = el("div", "chead"); top.append(el("p", "ptitle", "Undo changes"));
+  const xb = el("button", "pbtn", "Close"); xb.type = "button"; top.appendChild(xb);
+  const close = () => { wrap.remove(); document.removeEventListener("keydown", esc); };
+  const esc = e => { if (e.key === "Escape") close(); };
+  xb.onclick = close; wrap.onclick = e => { if (e.target === wrap) close(); }; document.addEventListener("keydown", esc);
+  const msg = el("p", "cammsg");
+  const help = el("p", "chint", "Newest change is on top. Tapping Undo on a change also undoes every change above it.");
+  const ul = el("ul", "clist ulist");
+  const draw = () => {
+    ul.textContent = "";
+    if (!undoStack.length){ ul.appendChild(el("li", "uempty", "Nothing to undo on this phone.")); return; }
+    undoStack.slice().reverse().forEach((u, i) => {
+      const li = el("li", "citem urow");
+      const t = el("div", "cinfo"); t.append(el("div", "cname", u.label), el("div", "sn", u.at ? whenText(u.at) : "Earlier"));
+      const k = i + 1;
+      const bt = el("button", "pbtn" + (i === 0 ? " primary" : ""), k === 1 ? "Undo" : "Undo " + k);
+      bt.type = "button"; bt.setAttribute("aria-label", k === 1 ? "Undo " + u.label : "Undo this and the " + (k - 1) + " newer change" + (k > 2 ? "s" : ""));
+      bt.onclick = () => { const done = undoSteps(k); msg.className = "cammsg good"; msg.textContent = "Undid " + (done.length === 1 ? done[0] + "." : done.length + " changes."); undoCount(); $("undoBar").hidden = true; draw(); };
+      li.append(t, bt); ul.appendChild(li);
+    });
+  };
+  draw();
+  box.append(top, msg, help, ul);
+  document.body.appendChild(wrap); xb.focus();
 }
 function removeBag(id, note, renumber){
   const b = bagOf(id), s = state[id];
@@ -1606,7 +1663,7 @@ $("pdfBtn").onclick = exportPdf;
 $("paidBtn").onclick = () => markPaid(true); $("unpaidBtn").onclick = () => markPaid(false);
 ["stFrom", "stTo", "stPaid"].forEach(id => $(id).addEventListener("change", renderStats));
 $("stClear").onclick = () => { $("stFrom").value = ""; $("stTo").value = ""; $("stPaid").value = "all"; renderStats(); };
-$("undoBtn").onclick = undo; $("undoLast").onclick = undo;
+$("undoBtn").onclick = undo; $("undoLast").onclick = openUndoList; undoCount();
 $("undoClose").onclick = () => { $("undoBar").hidden = true; };
 $("pdfDate").value = dayKey(Date.now());
 $("pdfRange").addEventListener("change", () => { const v = $("pdfRange").value; $("pdfDate").value = v.startsWith("d:") ? v.slice(2) : dayKey(Date.now()); });
