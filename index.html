@@ -820,6 +820,65 @@ body:has(.pickbar:not([hidden])) .wrap{padding-bottom:150px}
 :root[data-theme="dark"] .pickbar{background:rgba(26,31,50,.96);color:#F2F3FA;border-color:rgba(255,255,255,.14)}
 :root[data-theme="dark"] .pickbtn{background:rgba(255,255,255,.08)}
 body.locked .pickbar,body.locked .pickbtn{display:none!important}
+
+/* ===== List controls: one grouped toolbar, clear hierarchy ===== */
+.ctl{margin:16px 0 6px;padding:12px;border-radius:24px;background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 8px 22px rgba(60,50,120,.08)}
+.ctl .search{margin:0!important}
+.ctl .tabs{display:grid!important;grid-template-columns:repeat(4,1fr);gap:2px!important;margin:10px 0 0!important;padding:3px;border-radius:999px;background:rgba(27,34,68,.07)}
+.ctl .tabs button{background:transparent!important;border:0!important;box-shadow:none!important;color:#4B5478!important;padding:8px 4px!important;font-size:14px!important;border-radius:999px!important;white-space:nowrap;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.ctl .tabs button[aria-pressed="true"]{background:#fff!important;color:#C2187F!important;box-shadow:0 1px 2px rgba(27,34,68,.12),0 3px 10px rgba(27,34,68,.08)!important}
+.ctlrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
+.ctl .sortby{display:inline-flex!important;align-items:center;gap:0;margin:0!important;position:relative;color:#4B5478}
+.ctl .sortby svg{position:absolute;left:12px;pointer-events:none}
+.ctl .sortby select{appearance:none;-webkit-appearance:none;padding:8px 30px 8px 34px!important;font:600 14px var(--body)!important;color:#1B2244;border-radius:999px!important;border:1px solid rgba(27,34,68,.12)!important;background:rgba(255,255,255,.75) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%234B5478' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center/12px!important;box-shadow:none!important;cursor:pointer}
+.ctl .hideold{display:inline-flex!important;align-items:center;gap:8px;margin:0!important;padding:6px 12px 6px 6px;border-radius:999px;border:1px solid rgba(27,34,68,.12);background:rgba(255,255,255,.75);font:600 14px var(--body)!important;color:#1B2244;cursor:pointer}
+.ctl .hideold input{appearance:none;-webkit-appearance:none;width:34px!important;height:20px!important;border-radius:999px;background:rgba(27,34,68,.2);position:relative;transition:background .15s;cursor:pointer;margin:0}
+.ctl .hideold input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.ctl .hideold input:checked{background:#E0219A}
+.ctl .hideold input:checked::after{transform:translateX(14px)}
+.ctl .hideold input:focus-visible{outline:2px solid #E0219A;outline-offset:2px}
+.ctl .hideold b{color:#7A82A0;font-weight:600}
+.gpchip{margin-left:auto;padding:8px 14px;border-radius:999px;border:1px dashed rgba(224,33,154,.5);background:transparent;color:#C2187F;font:600 14px var(--body);cursor:pointer}
+.gpchip[aria-expanded="true"]{background:rgba(224,33,154,.1);border-style:solid}
+#vBags .gpwrap{margin:10px 0 0!important;border-radius:18px!important}
+#vBags .gpwrap:not([open]){display:none}
+#vBags .gpwrap summary{display:none}
+#vBags .gpwrap .cap{margin-top:0}
+.listhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:18px 4px 2px}
+.listhead h2{margin:0;font:700 20px/1.2 var(--body);letter-spacing:-.01em;color:var(--fg)}
+.listhead span{font:600 14px var(--body);color:var(--muted)}
+.listhint{margin:0 4px 10px;font:500 13.5px/1.4 var(--body);color:var(--muted)}
+#qMsg:empty{display:none}
+@media (max-width:380px){.gpchip{margin-left:0}}
+@media (prefers-color-scheme:dark){
+ :root:not([data-theme="light"]) .ctl{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+ :root:not([data-theme="light"]) .ctl .tabs{background:rgba(255,255,255,.07)}
+ :root:not([data-theme="light"]) .ctl .tabs button{color:#BFC5DD!important}
+ :root:not([data-theme="light"]) .ctl .tabs button[aria-pressed="true"]{background:rgba(255,255,255,.16)!important;color:#FF8CCB!important}
+ :root:not([data-theme="light"]) .ctl .sortby select,:root:not([data-theme="light"]) .ctl .hideold{background-color:rgba(255,255,255,.08)!important;color:#F2F3FA;border-color:rgba(255,255,255,.16)!important}
+ :root:not([data-theme="light"]) .ctl .sortby{color:#BFC5DD}
+ :root:not([data-theme="light"]) .ctl .hideold input{background:rgba(255,255,255,.22)}
+ :root:not([data-theme="light"]) .ctl .hideold input:checked{background:#FF5DB1}
+ :root:not([data-theme="light"]) .gpchip{color:#FF8CCB;border-color:rgba(255,93,177,.55)}
+ :root:not([data-theme="light"]) .ctl .sortby select option{color:#1B2244}
+}
+:root[data-theme="dark"] .ctl{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12)}
+:root[data-theme="dark"] .ctl .tabs button{color:#BFC5DD!important}
+:root[data-theme="dark"] .ctl .tabs button[aria-pressed="true"]{background:rgba(255,255,255,.16)!important;color:#FF8CCB!important}
+:root[data-theme="dark"] .ctl .sortby select,:root[data-theme="dark"] .ctl .hideold{background-color:rgba(255,255,255,.08)!important;color:#F2F3FA;border-color:rgba(255,255,255,.16)!important}
+
+.ctlrow{display:grid!important;grid-template-columns:auto 1fr;gap:8px}
+.ctl .hideold{justify-self:start;white-space:nowrap}
+.listhead{align-items:center!important;margin:18px 4px 4px!important}
+.listhead h2 #listCount{display:inline-block;min-width:28px;margin-left:4px;padding:2px 9px;border-radius:999px;background:rgba(27,34,68,.08);font:700 13px/1.4 var(--body);color:var(--muted);vertical-align:3px;text-align:center}
+.gpchip{margin-left:0!important;padding:6px 12px!important;font-size:13.5px!important}
+.gpwrap{scroll-margin-top:20px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .listhead h2 #listCount{background:rgba(255,255,255,.1)}}
+:root[data-theme="dark"] .listhead h2 #listCount{background:rgba(255,255,255,.1)}
+
+.listhead #listTitle{font:inherit!important;color:inherit!important}
+#vBags .gpwrap{margin:6px 0 12px!important}
+.ctl .hideold{min-width:0;max-width:100%}
 </style>
 
 </head>
@@ -866,10 +925,11 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
 
   <div id="vBags">
   <button type="button" class="scanbtn" id="scanBtn"><svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 12h8"/></svg>Scan QR to sell</button>
+  <div class="ctl">
   <form class="search" id="searchForm" role="search">
     <label for="q" class="sr">Search bags</label>
     <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    <input id="q" type="search" placeholder="Search bag no. or name, e.g. 12 or denim" autocomplete="off" enterkeyhint="search">
+    <input id="q" type="search" placeholder="Search bag number or name" autocomplete="off" enterkeyhint="search">
     <button type="button" id="qClear" class="qclear" aria-label="Clear search" hidden>×</button>
   </form>
   <div class="tabs" role="group" aria-label="Filter bags">
@@ -878,14 +938,19 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
     <button id="fSold" aria-pressed="false" data-f="sold">Sold</button>
     <button id="fRem" aria-pressed="false" data-f="removed">Removed</button>
   </div>
-  <label class="sortby" for="sortBy"><span>Sort by</span><select id="sortBy"><option value="num">Bag number</option><option value="low">Price: lowest to highest</option><option value="high">Price: highest to lowest</option></select></label>
-  <label class="hideold" for="hideOld"><input type="checkbox" id="hideOld"><span>Hide bags sold before today <b id="oldCount"></b></span></label>
+  <div class="ctlrow">
+    <label class="sortby" for="sortBy"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg><span class="sr">Sort by</span><select id="sortBy"><option value="num">Bag number</option><option value="low">Lowest price</option><option value="high">Highest price</option></select></label>
+    <label class="hideold" for="hideOld"><input type="checkbox" id="hideOld" role="switch"><span>Hide past sales <b id="oldCount"></b></span></label>
+  </div>
+  </div>
+  <div class="listhead"><h2><span id="listTitle">All bags</span> <span id="listCount"></span></h2><button type="button" class="gpchip" id="gpChip" aria-expanded="false" aria-controls="gpWrap">₱ Change prices</button></div>
   <details class="gpwrap" id="gpWrap"><summary>Change prices of a group</summary>
     <p class="cap">Changes every unsold bag with that price. Sold bags stay the same.</p>
     <div class="gprow"><label class="fld" for="gpFrom"><span>All unsold bags at ₱</span><input id="gpFrom" type="number" inputmode="numeric" min="0" class="numfld" placeholder="50"></label>
     <label class="fld" for="gpTo"><span>Change to ₱</span><input id="gpTo" type="number" inputmode="numeric" min="0" class="numfld" placeholder="40"></label>
     <button type="button" class="addbtn" id="gpBtn">Change prices</button></div>
     <p class="add-msg" id="gpMsg" aria-live="polite"></p></details>
+  <p class="listhint" id="listHint">Tap a box or hold a bag to pick several, then mark them sold together.</p>
   <p class="add-msg" id="qMsg" aria-live="polite"></p>
   <ul id="list"></ul>
   <p class="add-msg" id="listMsg" aria-live="polite"></p>
@@ -973,7 +1038,7 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
       <h3>Selling with the QR sticker</h3>
       <p>Tap <b>Scan QR to sell</b> and point the camera at each bag the buyer picked. They add up in a list with the total. Change a price if the buyer bargained, or tap × to take a bag off. Pick the payment once and tap <b>Mark sold</b>. Then tap <b>Next buyer</b>. Scanning a sticker with the phone camera also works.</p>
       <h3>Changing prices of a group</h3>
-      <p>Open <b>Change prices of a group</b> under the search box. Type the current price and the new one, for example ₱50 to ₱40, and tap the button. Only unsold bags change. Tap <b>Undo</b> to change them back.</p>
+      <p>Tap <b>₱ Change prices</b> above the bag list. Type the current price and the new one, for example ₱50 to ₱40, and tap the button. Only unsold bags change. Tap <b>Undo</b> to change them back.</p>
       <h3>Changing the helper PIN</h3>
       <p>Use <b>Change the PIN</b> at the top of this page. Type the current PIN and the new one twice. Every other phone asks for the new PIN once. Use <b>Forget the PIN on this phone</b> on a phone that shouldn't make changes anymore.</p>
       <h3>The first time on a phone</h3>
@@ -992,7 +1057,7 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
       <h3>Finding bags</h3>
       <ul>
         <li>Use the buttons: <b>All</b>, <b>Not sold</b>, <b>Sold</b>, <b>Removed</b>.</li>
-        <li><b>Hide bags sold before today</b> keeps the list short. Totals still count every sale.</li>
+        <li><b>Hide past sales</b> hides bags sold before today, so the list stays short. Totals still count every sale.</li>
       </ul>
       <h3>Invoice</h3>
       <p>In <b>Sales log</b>, pick which sales to include and the invoice date, then tap <b>Export invoice PDF</b>. If it doesn't download, tap the link that appears to open it. Works best in Chrome or Safari, not inside Messenger.</p>
@@ -1295,6 +1360,9 @@ function render(){
     ul.appendChild(li);
   });
   drawPickBar();
+  $("listTitle").textContent = q ? "Search results" : {all: "All bags", left: "Not sold", sold: hide ? "Sold today" : "Sold", removed: "Removed"}[filter] || "Bags";
+  $("listCount").textContent = rows.length;
+  $("listHint").hidden = pickMode || filter === "sold" || filter === "removed" || !BAGS.some(b => state[b.id].status === "available");
   totals(); renderLog(); if (typeof view !== "undefined" && view === "vStats") renderStats();
   $("addNum").placeholder = String(nextNum());
 }
@@ -1731,7 +1799,9 @@ $("pdfBtn").onclick = exportPdf;
 $("paidBtn").onclick = () => markPaid(true); $("unpaidBtn").onclick = () => markPaid(false);
 ["stFrom", "stTo", "stPaid"].forEach(id => $(id).addEventListener("change", renderStats));
 $("stClear").onclick = () => { $("stFrom").value = ""; $("stTo").value = ""; $("stPaid").value = "all"; renderStats(); };
-$("pickClear").onclick = () => setPickMode(false); $("pickGo").onclick = sellPicked;
+$("pickClear").onclick = () => setPickMode(false);
+$("gpChip").onclick = () => { const g = $("gpWrap"); g.open = !g.open; };
+$("gpWrap").addEventListener("toggle", () => { $("gpChip").setAttribute("aria-expanded", $("gpWrap").open); if ($("gpWrap").open) try { $("gpFrom").focus({preventScroll: true}); } catch(e){} }); $("pickGo").onclick = sellPicked;
 $("undoBtn").onclick = undo; $("undoLast").onclick = openUndoList; undoCount();
 $("undoClose").onclick = () => { $("undoBar").hidden = true; };
 $("pdfDate").value = dayKey(Date.now());
@@ -2048,7 +2118,7 @@ window.addEventListener("online", showPending); window.addEventListener("offline
 showPending();
 
 // ---- Auto-update: reload when a newer version of the site is published ----
-const APP_V = "2026-11-15-pick2";
+const APP_V = "2026-11-15-ctl1";
 let lastVerCheck = 0;
 async function checkVersion(){
   if (location.protocol === "file:" || Date.now() - lastVerCheck < 5 * 60e3) return; lastVerCheck = Date.now();
