@@ -1334,7 +1334,7 @@ async function flush(){
       const op = queue[0];
       let body;
       if (op.action === "delete") body = {pin, action: "delete", row: {id: op.id}};
-      else { const rows = op.ids.filter(i => bagOf(i)).map(rowOf); if (!rows.length){ queue.shift(); continue; } body = {pin, action: "batch", rows, row: rows[0]}; }
+      else { const rows = op.ids.filter(i => bagOf(i)).map(rowOf); if (!rows.length){ const qi = queue.indexOf(op); if (qi >= 0) queue.splice(qi, 1); continue; } body = {pin, action: "batch", rows, row: rows[0]}; }
       const r = await fetch(API_URL, {method: "POST", body: JSON.stringify(body)});
       const j = await r.json();
       if (!j.ok){
@@ -1342,7 +1342,7 @@ async function flush(){
         else setStatus(j.error === "locked" ? "Too many wrong PINs were tried. Wait 10 minutes, then try again." : "The sheet did not save a change. Try again later.");
         break;
       }
-      queue.shift(); saveLocal();
+      const qi = queue.indexOf(op); if (qi >= 0) queue.splice(qi, 1); saveLocal();
     }
     if (!queue.length) setStatus("Saved to the sheet · " + timeNow());
     showPending();
