@@ -937,6 +937,7 @@ queue = queue.map(q => q.ids || (q.action === "delete" && q.id) ? q : q.action =
 // Changes left on this phone from an earlier day wait for a yes before they save.
 let holdQueue = queue.some(q => !q.at || new Date(q.at).toDateString() !== new Date().toDateString());
 let srvRows = {}; try { srvRows = JSON.parse(LS("jb_srv") || "{}"); } catch(e){ srvRows = {}; }
+let imgSig = {}; try { imgSig = JSON.parse(LS("jb_imgsig") || "{}"); } catch(e){ imgSig = {}; }
 
 function normStatus(v){
   if (v.status === "available" || v.status === "sold" || v.status === "removed") return v.status;
@@ -1278,13 +1279,13 @@ async function pull(){
   if (!online) return;
   try {
     if (!pin){ lockUI(true); return; }
-    const r = await fetch(API_URL, {method: "POST", body: JSON.stringify({pin, action: "list"})}); const j = await r.json();
+    const r = await fetch(API_URL, {method: "POST", body: JSON.stringify({pin, action: "list", noimg: true})}); const j = await r.json();
     if (!j.ok){
       if (j.error === "pin"){ pin = ""; LSset("jb_pin", ""); lockUI(true, "That PIN is wrong. Type the helper PIN again."); if (typeof showPinState === "function") showPinState(); }
       else if (j.error === "locked") setStatus("Too many wrong PINs were tried. Wait 10 minutes, then try again.");
       return;
     }
-    const pending = pendingIds(), seen = new Set();
+    const pending = pendingIds(), seen = new Set(), needImg = [];
     lockUI(false);
     srvRows = {}; (j.rows || []).forEach(v => { srvRows[v.id] = {n: v.n, name: v.name, tag: v.tag, price: v.price, status: normStatus(v), pay: v.pay || "", note: v.note || "", paid: v.paid || ""}; });
     LSset("jb_srv", JSON.stringify(srvRows));
@@ -1294,12 +1295,23 @@ async function pull(){
       const b = bagOf(v.id), s = state[v.id]; if (!b || !s) return;
       if (v.n) b.n = Number(v.n);
       if (!b.img && typeof v.img === "string" && v.img.startsWith("data:image/")) b.img = v.img;
+      if (v.imgv && (imgSig[v.id] !== v.imgv || !b.img)) needImg.push(v.id);
       if (typeof v.price === "number" && !isNaN(v.price)) s.price = v.price;
       const st = normStatus(v); s.soldAt = typeof v.soldAt === "number" ? v.soldAt : (st === "sold" && s.status === "sold" ? s.soldAt : null); s.status = st; if (st !== "sold") s.paid = ""; else if ("paid" in v) s.paid = v.paid || "";
       if (j.v >= 2){ s.pay = v.pay || ""; s.note = v.note || ""; }
       if (v.extra){ b.name = String(v.name || b.name); b.tag = Number(v.tag) || b.tag; }
     });
     for (let i = BAGS.length - 1; i >= 0; i--){ const b = BAGS[i]; if (b.extra && !seen.has(b.id) && !pending.has(b.id)){ BAGS.splice(i, 1); delete state[b.id]; } }
+    // Photos only download when a bag is new to this phone or its photo changed.
+    const sigOf = {}; (j.rows || []).forEach(v => { sigOf[v.id] = v.imgv; });
+    for (let k = 0; k < needImg.length; k += 40){
+      const ids = needImg.slice(k, k + 40);
+      try {
+        const ri = await fetch(API_URL, {method: "POST", body: JSON.stringify({pin, action: "imgs", ids})}); const ji = await ri.json();
+        if (ji.ok && ji.imgs) Object.keys(ji.imgs).forEach(id => { const b = bagOf(id); const im = ji.imgs[id]; if (b && typeof im === "string" && im.startsWith("data:image/")){ b.img = im; imgSig[id] = sigOf[id]; } });
+      } catch(e){}
+    }
+    if (needImg.length) LSset("jb_imgsig", JSON.stringify(imgSig));
     saveLocal();
     if (busy()) totals(); else render();
     if (!queue.length) setStatus("Up to date · " + timeNow());
