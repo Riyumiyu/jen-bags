@@ -1,0 +1,1803 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}
+.scanwrap{position:fixed;inset:0;background:rgba(20,20,30,.55);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:12px}
+.scanbox{background:#fff;border-radius:16px;width:100%;max-width:440px;max-height:92vh;overflow:auto;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.scanhead{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.scanhead img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:none;background:#eee}
+.scanhead .sn{font-size:13px;color:#666;font-weight:700}
+.scanhead .sd{font-size:17px;font-weight:700;line-height:1.25}
+.scanhead .ss{font-size:13px;color:#666;margin-top:2px}
+.scanprice{display:flex;align-items:center;gap:6px;font-size:22px;font-weight:700;margin:4px 0 12px}
+.scanprice input{font:inherit;width:140px;padding:6px 10px;border:1.5px solid #ccd;border-radius:10px}
+.scanmsg{font-size:16px;font-weight:700;margin:6px 0 12px}
+.scanmsg.ok{color:#137333}.scanmsg.warn{color:#b3261e}
+.scanbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:14px 0 0;font:700 17px var(--body);padding:13px 16px;border-radius:12px;border:0;background:var(--sold);color:var(--card);cursor:pointer}
+.camwrap{align-items:center}
+.camvid{width:100%;aspect-ratio:4/3;max-height:34vh;object-fit:cover;border-radius:12px;background:#111;display:block;margin:6px 0 10px}
+.cammsg{font-size:15px;font-weight:600;margin:0 0 12px}
+.chead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.chead .ptitle{margin:0}
+.cammsg.warn{color:#b3261e}
+.scanmore{width:100%;margin:0 0 10px}
+.ccount{font-size:14px;color:#666;font-weight:700;margin:4px 0}
+.clist{list-style:none;padding:0;margin:0 0 10px}
+.citem{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #eee}
+.citem img{width:48px;height:48px;border-radius:8px;object-fit:cover;flex:none;background:#eee}
+.cinfo{flex:1;min-width:0}.cname{font-size:14px;font-weight:600;line-height:1.25}
+.cprice{display:flex;align-items:center;gap:3px;font-weight:700}.cprice input{width:70px;font:700 16px var(--body);padding:6px 8px;border:1.5px solid #ccd;border-radius:8px}
+.cx{border:0;background:none;font-size:24px;line-height:1;color:#888;padding:4px 6px;cursor:pointer}
+.ctotal{display:flex;justify-content:space-between;align-items:baseline;font-size:18px;border-top:2px solid #333;padding-top:8px;margin-bottom:10px}.ctotal b{font-size:24px}
+.bigok{width:100%;padding:13px;font-size:17px;margin-top:6px}
+.gpwrap{margin:12px 0 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.gpwrap summary{font-weight:700;cursor:pointer}.gprow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+</style>
+<title>Jen Bags Sale Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400..800;1,400..600&display=swap">
+<style>
+/* Layout: sticky money summary on top, then one row per bag (photo, name, editable price, sold box). Phone first. */
+:root{
+  --bg:#f3f4f7; --card:#ffffff; --fg:#1b2133; --muted:#454d60; --line:#dde1ea;
+  --accent:#2f4fa8; --accent-soft:#e3e9f8; --sold:#1f7a4d; --sold-soft:#e2f3ea; --warn:#a4570d;
+  --display:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151d; --card:#1b2030; --fg:#e8ebf3; --muted:#bcc3d4; --line:#2c3347;
+  --accent:#8ea8f0; --accent-soft:#232c45; --sold:#5fcf94; --sold-soft:#173226; --warn:#f0b066; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151d; --card:#1b2030; --fg:#e8ebf3; --muted:#bcc3d4; --line:#2c3347;
+  --accent:#8ea8f0; --accent-soft:#232c45; --sold:#5fcf94; --sold-soft:#173226; --warn:#f0b066; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.4}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--card)}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line);margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:14px max(16px,env(safe-area-inset-left,0px)) 12px}
+h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0 0 10px;letter-spacing:-.01em}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 10px;min-width:0}
+.stat b{display:block;font-family:var(--display);font-weight:700;font-size:20px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat span{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.stat.money b{color:var(--sold)}
+.fee{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.fee div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border:1px dashed var(--line);border-radius:10px;padding:6px 10px;min-width:0}
+.fee span{font-size:14px;color:var(--muted);font-weight:700}
+.fee b{font-family:var(--display);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+#sFee{color:var(--accent)}
+.sub{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;margin-top:8px;font-size:15px;color:var(--muted)}
+.sub strong{color:var(--fg);font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:6px;margin:14px 0 10px}
+.tabs button{font:inherit;font-weight:700;font-size:15px;border:1px solid var(--line);background:var(--card);color:var(--fg);padding:7px 14px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--card)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+li{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px 8px 8px}
+li.is-sold{background:var(--sold-soft);border-color:transparent}
+li img{width:64px;height:64px;border-radius:8px;object-fit:cover;display:block;cursor:zoom-in}
+li.is-sold img{opacity:.55}
+.info{min-width:0}
+.num{font-size:14px;color:var(--muted);font-weight:700}
+.name{font-weight:700;overflow-wrap:anywhere}
+li.is-sold .name{text-decoration:line-through;text-decoration-color:var(--muted)}
+.tag{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tag.changed{color:var(--warn);font-weight:700}
+.ctrl{display:flex;align-items:center;gap:10px}
+.price{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:0 6px}
+.price span{color:var(--muted);font-size:15px}
+.price input{width:52px;border:0;background:transparent;color:var(--fg);font:700 16px var(--body);padding:8px 2px;font-variant-numeric:tabular-nums;text-align:right}
+.price input:focus{outline:none}
+.price:focus-within{border-color:var(--accent)}
+.chk{width:30px;height:30px;accent-color:var(--sold);cursor:pointer;margin:0}
+.log{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.log-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.log h2{font-family:var(--display);font-weight:700;font-size:17px;margin:0}
+.log-head span{font-size:15px;color:var(--muted)}
+.log ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.log li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:baseline;background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:8px 0}
+.log li:first-child{border-top:0}
+.log time{font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.log .what{overflow-wrap:anywhere}
+.log .amt{font-weight:700;color:var(--sold);font-variant-numeric:tabular-nums}
+.log .none{color:var(--muted);grid-template-columns:1fr}
+.add{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.add h2{font-family:var(--display);font-weight:700;font-size:17px;margin:0}
+.add-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld.grow{flex:1 1 200px}
+.fld span{font-size:14px;font-weight:700;color:var(--muted)}
+.fld input{font:500 16px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.fld input[type=number]{width:110px}
+.fld input[type=file]{padding:6px}
+.addbtn{font:700 16px var(--body);background:var(--accent);color:var(--card);border:0;border-radius:8px;padding:10px 18px;cursor:pointer}
+.addbtn:disabled{opacity:.6;cursor:default}
+.add-msg{margin:0;font-size:15px;color:var(--muted);min-height:18px}
+.ask{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:6px;font-size:15px;font-weight:700}
+.ask button{font:700 15px var(--body);border-radius:6px;padding:5px 10px;cursor:pointer}
+.ask-yes{background:var(--warn);color:var(--card);border:1px solid var(--warn)}
+.ask-no{background:var(--card);color:var(--fg);border:1px solid var(--line)}
+.rm{font:700 14px var(--body);color:var(--muted);background:none;border:0;padding:2px 0;cursor:pointer;text-decoration:underline}
+.rm.armed{color:var(--warn)}
+.pin{margin-top:8px;padding:10px;border:1px solid var(--warn);border-radius:10px}
+.pin p{margin:0 0 6px;font-size:15px;font-weight:700;color:var(--warn)}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.panel.full{grid-column:1/-1}
+.panel.warn{border-color:var(--warn)}
+.ptitle{margin:0;font-weight:700}
+.plabel{font-size:14px;font-weight:700;color:var(--muted)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:700 15px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--sold);border-color:var(--sold);color:var(--card)}
+.prow{display:flex;gap:8px;flex-wrap:wrap}
+.pbtn{font:700 15px var(--body);padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.pbtn.primary{background:var(--sold);border-color:var(--sold);color:var(--card)}
+.pbtn.danger{background:var(--warn);border-color:var(--warn);color:var(--card)}
+.perr{margin:0;font-size:14px;font-weight:700;color:var(--warn);min-height:0}
+.perr:empty{display:none}
+.logdd{margin-top:6px;border-top:1px solid var(--line)}
+.logdd summary{cursor:pointer;font-weight:700;color:var(--accent);padding:10px 0;list-style:none;display:flex;align-items:center;gap:8px}
+.logdd summary::-webkit-details-marker{display:none}
+.logdd summary::before{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.logdd[open] summary::before{transform:rotate(45deg)}
+.logdd summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.logdd summary::before{transition:none}}
+.search{display:flex;align-items:center;gap:8px;margin:14px 0 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:0 10px;color:var(--muted)}
+.search:focus-within{border-color:var(--accent)}
+.search input{flex:1;min-width:0;border:0;background:transparent;color:var(--fg);font:400 16px var(--body);padding:12px 0}
+.search input:focus{outline:none}
+.search input::-webkit-search-cancel-button{display:none}
+.qclear{border:0;background:var(--bg);color:var(--fg);width:30px;height:30px;border-radius:50%;font-size:20px;line-height:1;cursor:pointer}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hideold{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:15px;cursor:pointer}
+.hideold input{width:20px;height:20px;margin:0;accent-color:var(--accent);flex:none}
+.hideold b{color:var(--muted);font-weight:700}
+.pdflink{color:var(--accent);font-weight:700;text-decoration:underline}
+.datefld{font:500 16px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.undobar{position:fixed;left:0;right:0;bottom:0;z-index:15;display:flex;align-items:center;gap:10px;background:var(--fg);color:var(--card);padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));font-size:15px;box-shadow:0 -2px 12px rgba(0,0,0,.2)}
+.undobar span{flex:1;min-width:0}
+#undoBtn{font:700 15px var(--body);background:var(--card);color:var(--fg);border:0;border-radius:8px;padding:8px 16px;cursor:pointer}
+#undoClose{background:none;border:0;color:var(--card);font-size:22px;cursor:pointer;padding:0 4px}
+.undolink{font:700 14px var(--body);background:none;border:1px solid var(--line);color:var(--accent);border-radius:8px;padding:5px 10px;cursor:pointer;margin-top:6px}
+.views{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:14px 0 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px}
+.views button{font:700 15px var(--body);border:0;background:transparent;color:var(--fg);padding:10px 6px;border-radius:9px;cursor:pointer}
+.views button[aria-pressed="true"]{background:var(--accent);color:var(--card)}
+#vStats,#vHelp{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+#vStats[hidden],#vHelp[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h2{font-family:var(--display);font-weight:700;font-size:18px;margin:0 0 2px}
+.cap{margin:0 0 12px;font-size:14px;color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.fact b{display:block;font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.fact span{font-size:13px;color:var(--muted);font-weight:700}
+.hbars{display:flex;flex-direction:column;gap:10px}
+.hb{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+.hb-top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.hb-top b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.hb-track{height:12px;background:var(--bg);border-radius:4px;overflow:hidden}
+.hb-fill{height:100%;background:var(--accent);border-radius:0 4px 4px 0;min-width:2px}
+.cols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;align-items:end;height:170px;border-bottom:1px solid var(--line);padding-top:18px}
+.col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0;position:relative}
+.col-bar{width:70%;max-width:28px;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.col-v{font-size:12px;font-weight:700;margin-bottom:3px;font-variant-numeric:tabular-nums}
+.col-axis{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;margin-top:4px}
+.col-axis span{font-size:12px;color:var(--muted);text-align:center;white-space:nowrap}
+.chempty{font-size:15px;color:var(--muted);margin:0}
+.help h3{font-size:16px;margin:14px 0 4px}
+.help ol,.help ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:15px;line-height:1.45}
+.help p{margin:0;font-size:15px;line-height:1.45}
+.help li{display:list-item;background:none;border:0;padding:0;border-radius:0}
+.help ul{list-style:disc}
+.help ol{list-style:decimal}
+.chkrow{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.chkrow input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--warn)}
+.chkrow span{display:flex;flex-direction:column;gap:2px}
+.chkrow small{color:var(--muted);font-size:14px}
+.meta{font-size:14px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.paychip{display:inline-block;font-size:13px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--sold);color:var(--card)}
+.paychip.unset{background:var(--line);color:var(--muted)}
+.bnote{font-size:14px;color:var(--fg);margin-top:3px;font-style:italic;overflow-wrap:anywhere}
+.acts{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+.rm.strong{color:var(--accent)}
+li.is-removed{background:var(--bg);border-style:dashed;opacity:.85}
+li.is-removed img{filter:grayscale(1);opacity:.5}
+li.is-removed .name,li.is-removed .tag{text-decoration:line-through;text-decoration-color:var(--warn);text-decoration-thickness:2px}
+li.is-removed .num{color:var(--warn)}
+.amtcol{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.lognote{display:block;color:var(--muted);font-style:italic}
+.paybreak{margin:0 0 8px;font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pdfrow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:4px}
+.pdfrow select{font:500 16px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.fld input.numfld{width:80px}
+.paidchip{display:inline-block;font-size:13px;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--sold);color:var(--sold);white-space:nowrap}
+.ghostbtn{font:700 16px var(--body);background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:9px 16px;cursor:pointer}
+.statfilter{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:10px 0 12px}
+.statfilter select{font:500 16px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.empty{text-align:center;color:var(--muted);padding:30px 0}
+.note{font-size:14px;color:var(--muted);margin-top:16px}
+.status{font-size:14px;color:var(--muted);min-height:16px;margin-top:6px}
+.zoom{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:24px}
+.zoom img{max-width:min(92vw,520px);border-radius:12px}
+@media (max-width:420px){li{grid-template-columns:56px minmax(0,1fr) auto;gap:10px}li img{width:56px;height:56px}.price input{width:44px}.stat b{font-size:17px}}
+/* ===== Jen Bags: denim + thread (see design plan) ===== */
+:root{
+  --bg:#ECEFF5; --card:#FFFFFF; --fg:#24304D; --muted:#5B647C; --line:#D6DCE8;
+  --accent:#D81B8C; --accent-soft:#FCE4EE; --sold:#2D7A4F; --sold-soft:#E4F1E8; --warn:#B0700F;
+  --denim:#24304D; --thread:#D81B8C; --blush:#FCE4EE;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141A2A; --card:#1E2638; --fg:#E9ECF4; --muted:#AAB2C6; --line:#313B52;
+  --accent:#FF5DB1; --accent-soft:#3B2033; --sold:#6CCB95; --sold-soft:#1C2E26; --warn:#E6B154;
+  --denim:#2C3A5E; --thread:#FF5DB1; --blush:#3B2033; color-scheme:dark}}
+body{padding-bottom:88px}
+body::before{background:var(--bg)}
+header{position:static;background:transparent;border:0;padding-top:16px;padding-bottom:4px}
+h1{display:flex;align-items:flex-end;gap:8px;margin:0 0 14px;font:700 26px/1 var(--display);letter-spacing:-.02em}
+h1 .logo{width:72px;height:auto;display:block}
+h1 span{padding-bottom:4px}
+.patch{position:relative;background:var(--denim);color:#fff;border-radius:14px;padding:18px 20px 16px;outline:2px dashed var(--thread);outline-offset:-8px}
+.plabel2{font-size:15px;color:#C8CFE2}
+.patch .big{display:block;font:800 44px/1.05 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:2px 0 10px}
+.patch .fee{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;margin:0}
+.patch .fee div{display:flex;flex-direction:column;align-items:flex-start;border:0;padding:0;gap:0}
+.patch .fee span{color:#C8CFE2;font-size:14px;font-weight:400}
+.patch .fee b{font:700 20px var(--display);color:#fff}
+.patch #sNet{color:#FFB3DC}.patch #sFee{color:#C8CFE2;font-weight:500}
+.pair{display:grid;grid-template-columns:1fr 1fr;margin:14px 2px 0}
+.pair div{display:flex;flex-direction:column;padding:2px 14px}
+.pair div:first-child{padding-left:0;border-right:2px dashed var(--line)}
+.pair b{font:700 26px/1.1 var(--display);font-variant-numeric:tabular-nums}
+.pair span{font-size:14px;color:var(--muted)}
+.sub{display:block;margin:16px 0 0;padding:12px 0 0;border-top:1px solid var(--line);font-size:15px}
+.sub h2{font:700 16px var(--display);margin:0 0 4px;color:var(--fg)}
+.sub span{display:flex;justify-content:space-between;gap:12px;padding:3px 0;color:var(--muted)}
+.sub span:empty{display:none}
+.sub strong{font-family:var(--display);font-weight:700}
+.sub .subnote{display:block;font-size:14px;padding-top:6px}
+.views{position:fixed;left:0;right:0;bottom:0;z-index:12;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--denim);border:0;border-radius:0;padding:0 max(8px,env(safe-area-inset-left,0px)) env(safe-area-inset-bottom,0px)}
+.views button{color:#C8CFE2;border-radius:0;padding:16px 4px 14px;font-size:15px;position:relative;background:transparent}
+.views button[aria-pressed="true"]{background:transparent;color:#fff}
+.views button[aria-pressed="true"]::after{content:"";position:absolute;left:22%;right:22%;bottom:8px;border-bottom:3px dashed var(--thread)}
+.undobar{bottom:calc(56px + env(safe-area-inset-bottom,0px))}
+.scanbtn{background:var(--thread);border-radius:14px;padding:15px;font:700 18px var(--display);margin-top:16px}
+.search{border-radius:14px}
+.tabs button[aria-pressed="true"]{background:var(--denim);border-color:var(--denim)}
+/* Bag rows are hang tags: notched left end, punched hole, stitched edge */
+#list li{position:relative;border:0;border-radius:0 12px 12px 0;padding:10px 12px 10px 30px;
+  clip-path:polygon(16px 0,100% 0,100% 100%,16px 100%,0 calc(100% - 16px),0 16px)}
+#list li::before{content:"";position:absolute;left:9px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--bg);box-shadow:inset 0 0 0 2px var(--line)}
+#list li::after{content:"";position:absolute;inset:5px 5px 5px 24px;border:1.5px dashed var(--thread);opacity:.32;border-radius:0 8px 8px 0;pointer-events:none}
+#list li.is-sold{background:var(--sold-soft)}
+#list li.is-sold::after{border-color:var(--sold);opacity:.45}
+#list li.is-sold .num::after{content:"Sold";display:inline-block;margin-left:8px;padding:0 6px;border:2px solid var(--sold);color:var(--sold);border-radius:4px;font:800 13px var(--display);transform:rotate(-6deg)}
+#list li.is-removed{background:var(--card);opacity:.75}
+#list li.is-removed::after{border-color:var(--warn)}
+#list li > *{position:relative;z-index:1}
+li img{border-radius:10px}
+.num{font-size:14px}
+.name{font:700 16px/1.25 var(--display)}
+.price{border-radius:10px}
+.chk{accent-color:var(--sold)}
+.log,.add,.card,.gpwrap{border-radius:14px}
+.card h2,.log h2,.add h2{font-family:var(--display)}
+.fact b,.stat b{font-family:var(--display)}
+.hb-fill,.col-bar{background:var(--denim)}
+.addbtn,.pbtn.primary,.seg button[aria-pressed="true"]{background:var(--thread);border-color:var(--thread)}
+.paychip{background:var(--denim)}
+.scanbox{border-radius:18px}
+.ctotal{border-top:2px dashed var(--thread)}
+.ctotal b{font-family:var(--display)}
+.scanmsg{font-family:var(--display)}
+@media (max-width:380px){.patch .big{font-size:38px}.pair b{font-size:22px}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tabs button[aria-pressed="true"]{background:var(--thread);border-color:var(--thread);color:#fff}}
+
+.flashbtn{width:100%;margin:0 0 8px}.flashbtn[aria-pressed="true"]{background:#FFE9A8;border-color:#E6B154;color:#24304D}
+
+/* ===== Statistics: denim + thread ===== */
+#vStats{gap:14px}
+.stfilt{font-size:15px;color:var(--muted)}
+.stfilt summary{cursor:pointer;list-style:none;padding:4px 2px}
+.stfilt summary::-webkit-details-marker{display:none}
+.stfilt summary b{color:var(--fg)}
+.stfilt summary u{color:var(--thread);font-weight:700;text-underline-offset:3px;margin-left:4px}
+.stfilt .statfilter{margin:8px 0 0}
+#vStats .patch .plabel2 span{color:inherit}
+#vStats .patch .keep{color:#FFB3DC}
+#vStats .patch .cutv{color:#C8CFE2;font-weight:500}
+.card{border:0;box-shadow:none}
+.card h2{font:700 18px var(--display);margin:0 0 4px}
+.spn{margin:2px 0 10px;font-size:16px;color:var(--muted)}
+.spn b{font:800 34px/1 var(--display);color:var(--fg);margin-right:2px}
+.thread{position:relative;height:6px;margin:6px 0;border-top:2px dashed var(--line);top:2px}
+.thread .tfill{position:absolute;left:0;top:-4px;height:6px;border-radius:6px;background:var(--thread);min-width:6px}
+.thread.big{height:12px;border-top-width:3px;border-top-color:color-mix(in srgb,var(--thread) 35%,var(--line))}
+.thread.big .tfill{height:12px;top:-7px}
+.rcpt{display:flex;flex-direction:column;margin-top:6px}
+.rrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1.5px dashed var(--line);font-size:15px}
+.rrow:first-child{border-top:0}
+.rrow span{color:var(--muted)}
+.rrow b{font-family:var(--display);font-weight:700;text-align:right}
+.rrow.due b{color:var(--warn)}
+.spool .rcpt{margin-top:10px;border-top:1.5px dashed var(--line)}
+.spool .rcpt .rrow:first-child{border-top:0}
+.hbars{gap:14px}
+.hb-top{font-size:15px}.hb-top b{font-family:var(--display)}
+.cols{border-bottom:2px dashed var(--line)}
+.col-bar{background:var(--denim);border-radius:6px 6px 2px 2px;max-width:22px}
+.col.peak .col-bar{background:var(--thread)}
+.col.peak .col-v{color:var(--thread)}
+.split{display:flex;height:16px;border-radius:8px;overflow:hidden;gap:3px;margin:8px 0 12px}
+.split span{display:block;height:100%;min-width:4px}
+.seg0{background:var(--thread)}.seg1{background:var(--denim)}.seg2{background:var(--sold)}.seg3{background:var(--warn)}
+.legend{display:flex;flex-direction:column}
+.lrow{display:grid;grid-template-columns:14px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-top:1.5px dashed var(--line);font-size:15px}
+.lrow:first-child{border-top:0}
+.lrow b{font-family:var(--display)}
+.dot{width:12px;height:12px;border-radius:50%;display:block}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .col-bar{background:#8EA2D8}:root:not([data-theme="light"]) .seg1{background:#8EA2D8}}
+body[data-view="vStats"] header .patch,body[data-view="vStats"] header .pair,body[data-view="vStats"] header .sub,body[data-view="vHelp"] header .patch,body[data-view="vHelp"] header .pair,body[data-view="vHelp"] header .sub{display:none}
+.col-axis span{overflow:visible}
+.pincard{display:flex;flex-direction:column;gap:10px}.pincard details summary{cursor:pointer;font-weight:700;color:var(--thread)}.pincard form{display:flex;flex-direction:column;gap:10px;margin-top:10px}.pincard .fld input{width:120px}.pincard .ghostbtn{align-self:flex-start}
+
+/* ===== 2026 pass: crafted, not generated ===== */
+:root{
+  --bg:#E3E8F2; --card:#FFFFFF; --fg:#1E2440; --muted:#4F5874; --line:#C9D0E0;
+  --edge:#1E2440; --hard:#1E2440;
+  --denim:#2B3A67; --thread:#E0219A; --blush:#FFD3E8; --mustard:#F6C445; --lime:#C9E77A;
+  --accent:#E0219A; --sold:#227A4C; --sold-soft:#E3F3D2; --warn:#9A5B00;
+  --weave:repeating-linear-gradient(0deg,rgba(30,36,64,.045) 0 1px,transparent 1px 4px),repeating-linear-gradient(90deg,rgba(30,36,64,.045) 0 1px,transparent 1px 4px);
+  --script:"Dancing Script",cursive;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121726; --card:#1D2438; --fg:#EEF0F7; --muted:#AEB6CC; --line:#323B55;
+  --edge:#8F9BC2; --hard:#05070D;
+  --denim:#30447A; --thread:#FF5DB1; --blush:#4A2440; --mustard:#5A4614; --lime:#2F4119;
+  --accent:#FF5DB1; --sold:#7FD6A1; --sold-soft:#1C3024; --warn:#F2BE5C;
+  --weave:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 4px),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 4px)}}
+body{background-color:var(--bg);background-image:var(--weave)}
+body::before{background:var(--bg)}
+h1{margin:0;align-items:center}
+h1 span{font:800 34px/1 var(--display);font-stretch:75%;letter-spacing:-.01em;padding:0}
+.scrib{position:relative;display:inline-block;margin:2px 0 14px 2px;font:700 21px/1.2 var(--script);color:var(--thread)}
+.scrib svg{position:absolute;left:0;right:0;bottom:-7px;width:100%;height:10px;color:var(--thread);opacity:.75}
+.bento{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tile{position:relative;border:2px solid var(--edge);border-radius:16px;box-shadow:4px 4px 0 var(--hard);padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;min-height:84px;min-width:0}
+.tile span{font-size:14px;font-weight:700}
+.tile b{font:800 26px/1.05 var(--display);font-stretch:80%;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-col{grid-column:1/-1}
+.t-keep{background:var(--blush)} .t-cut{background:var(--card)} .t-cut b{color:var(--muted);font-weight:600}
+.t-left{background:var(--mustard)} .t-count{background:var(--lime)}
+.patch{background-color:var(--denim);background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 2px,transparent 2px 5px),repeating-linear-gradient(-45deg,rgba(0,0,0,.12) 0 1px,transparent 1px 5px);border:2px solid var(--edge);box-shadow:4px 4px 0 var(--hard);border-radius:16px;outline:2px dashed var(--thread);outline-offset:-9px}
+.patch .big{font:800 52px/1 var(--display);font-stretch:75%;margin:4px 0 2px;color:#fff}
+.t-col .plabel2{color:#D7DDF0}
+.sub{background:var(--card);border:2px solid var(--edge);border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:none}
+.sub h2{font:800 20px var(--display);font-stretch:80%}
+.sub span{border-top:1.5px dashed var(--line);padding:6px 0}
+.sub h2+span{border-top:0}
+.status{margin-top:10px}
+.scanbtn,.addbtn,.pbtn.primary,.ghostbtn,.pbtn{border:2px solid var(--edge);box-shadow:3px 3px 0 var(--hard);transition:transform .06s,box-shadow .06s}
+.scanbtn:active,.addbtn:active,.pbtn:active,.ghostbtn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+.scanbtn{border-radius:16px;font:800 20px var(--display);font-stretch:85%;padding:16px;box-shadow:4px 4px 0 var(--hard)}
+@media (prefers-reduced-motion:reduce){.scanbtn,.addbtn,.pbtn,.ghostbtn{transition:none}}
+.search{border:2px solid var(--edge);border-radius:14px;box-shadow:none;background:var(--card)}
+.tabs button{border:2px solid var(--edge);box-shadow:none;background:var(--card)}
+.tabs button[aria-pressed="true"]{background:var(--edge);color:var(--card)}
+/* hang tags: outline + hard shadow, punched hole, stitched line */
+#list li{clip-path:none;border:2px solid var(--edge);border-radius:8px 16px 16px 8px;box-shadow:3px 3px 0 var(--hard);padding:10px 12px 10px 30px;background:var(--card)}
+#list li::before{left:9px;width:11px;height:11px;margin-top:-5.5px;background:var(--bg);box-shadow:inset 0 0 0 2px var(--edge)}
+#list li::after{inset:5px 5px 5px 26px;border-radius:2px 11px 11px 2px;opacity:.45}
+#list li.is-sold{background:var(--sold-soft)}
+#list li.is-removed{box-shadow:none;border-style:dashed}
+#list li.is-sold .num::after{border-width:2px;transform:rotate(-8deg)}
+.log,.add,.card,.gpwrap{border:2px solid var(--edge);border-radius:16px;box-shadow:4px 4px 0 var(--hard)}
+.views{border-top:3px dashed var(--thread);background:var(--denim)}
+.views button[aria-pressed="true"]::after{border-bottom-style:solid}
+.scanbox{border:2px solid var(--edge);box-shadow:6px 6px 0 var(--hard)}
+.citem{border:1.5px solid var(--line)}
+.rrow,.lrow{border-top-color:var(--line)}
+#vStats .patch .big{font-size:48px}
+#vStats .patch .fee b{font:800 22px var(--display);font-stretch:80%}
+.spn b{font-stretch:75%;font-size:40px}
+.thread .tfill{background:var(--thread);border:1.5px solid var(--edge)}
+.split{border:2px solid var(--edge)}
+.col-bar{border:1.5px solid var(--edge);border-bottom:0}
+.card h2,.log h2,.add h2{font:800 21px var(--display);font-stretch:80%}
+@media (max-width:380px){.patch .big{font-size:44px}.tile b{font-size:22px}h1 span{font-size:30px}}
+body[data-view="vStats"] header .bento,body[data-view="vHelp"] header .bento{display:none}
+.t-cut #sFee{color:var(--muted)}.t-keep #sNet{color:var(--fg)}
+header h1{margin:0 0 16px}
+.sortby{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:15px;font-weight:700;color:var(--muted)}.sortby select{font:700 15px var(--body);color:var(--fg);background:var(--card);border:2px solid var(--edge);border-radius:12px;padding:7px 10px}
+
+/* ===== Glass pass ===== */
+:root{
+  --fg:#1C2240; --muted:#4A5272; --line:rgba(28,34,64,.14);
+  --glass:rgba(255,255,255,.52); --glass-strong:rgba(255,255,255,.72); --glass-edge:rgba(255,255,255,.75);
+  --glass-shadow:0 10px 30px rgba(43,58,103,.14);
+  --blur:blur(18px) saturate(160%);
+  --tint-keep:rgba(255,179,220,.45); --tint-left:rgba(246,196,69,.42); --tint-count:rgba(201,231,122,.45);
+  --blobs:radial-gradient(42% 38% at 12% 8%,#FFB6DD 0,transparent 70%),radial-gradient(45% 40% at 95% 18%,#A9BDF5 0,transparent 70%),radial-gradient(40% 35% at 85% 78%,#F7D77E 0,transparent 70%),radial-gradient(45% 40% at 8% 82%,#C6E89B 0,transparent 70%),linear-gradient(160deg,#F3EEF8,#E7ECF7);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --fg:#EEF0F8; --muted:#B4BCD3; --line:rgba(255,255,255,.12);
+  --glass:rgba(30,36,58,.48); --glass-strong:rgba(30,36,58,.7); --glass-edge:rgba(255,255,255,.14);
+  --glass-shadow:0 10px 30px rgba(0,0,0,.35);
+  --tint-keep:rgba(255,93,177,.22); --tint-left:rgba(246,196,69,.18); --tint-count:rgba(150,210,90,.18);
+  --blobs:radial-gradient(42% 38% at 12% 8%,#6B1F4E 0,transparent 70%),radial-gradient(45% 40% at 95% 18%,#25397A 0,transparent 70%),radial-gradient(40% 35% at 85% 78%,#5A4518 0,transparent 70%),radial-gradient(45% 40% at 8% 82%,#2D4A1E 0,transparent 70%),linear-gradient(160deg,#141828,#10131F)}}
+html{background:#E7ECF7}
+body{background:transparent;background-image:none}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background:var(--blobs)}
+body::before{background:transparent}
+.glassy,.tile,.sub,.log,.add,.card,.gpwrap,.search,.scanbox,#list li,.pin{
+  background:var(--glass)!important;border:1px solid var(--glass-edge)!important;box-shadow:var(--glass-shadow)!important;
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.tile{border-radius:22px}
+.t-keep{background:var(--tint-keep)!important}.t-left{background:var(--tint-left)!important}.t-count{background:var(--tint-count)!important}
+.patch{background:rgba(36,48,90,.78)!important;background-image:none!important;border:1px solid rgba(255,255,255,.25)!important;box-shadow:0 14px 34px rgba(36,48,90,.3)!important;outline:1.5px dashed rgba(255,120,200,.7);outline-offset:-9px;border-radius:24px;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.sub,.log,.add,.card,.gpwrap{border-radius:22px}
+.sub span{border-top-color:var(--line)}
+/* bag rows: frosted tags (no blur per row, keeps scrolling smooth) */
+#list li{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--glass-strong)!important;border-radius:12px 20px 20px 12px}
+#list li.is-sold{background:rgba(214,240,196,.7)!important}
+#list li.is-removed{opacity:.7}
+#list li::before{background:transparent;box-shadow:inset 0 0 0 2px rgba(28,34,64,.35)}
+#list li::after{opacity:.28}
+.price{background:rgba(255,255,255,.55);border:1px solid var(--glass-edge)}
+.scanbtn{border:1px solid rgba(255,255,255,.4);border-radius:20px;background:linear-gradient(135deg,#F03AA6,#C9157E);box-shadow:0 12px 28px rgba(224,33,154,.35)}
+.scanbtn:active,.addbtn:active,.pbtn:active,.ghostbtn:active{transform:scale(.98);box-shadow:none}
+.addbtn,.pbtn,.ghostbtn{border:1px solid var(--glass-edge);box-shadow:0 4px 14px rgba(43,58,103,.12)}
+.ghostbtn,.pbtn{background:var(--glass-strong);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.tabs button{border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.tabs button[aria-pressed="true"]{background:rgba(36,48,90,.85);color:#fff}
+.sortby select,.fld input,.datefld,.pdfrow select,.statfilter select{background:var(--glass-strong);border:1px solid var(--glass-edge)}
+.views{background:rgba(36,48,90,.72);border-top:1px solid rgba(255,255,255,.2);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));border-radius:22px;padding:0 6px}
+.views button[aria-pressed="true"]::after{border-bottom:3px solid #FF7CC4;border-radius:3px}
+.undobar{border-radius:18px;background:rgba(28,34,64,.85);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+.scanwrap{background:rgba(20,24,44,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.scanbox{border-radius:26px;background:var(--glass-strong)!important}
+.citem{background:rgba(255,255,255,.5);border:1px solid var(--glass-edge)}
+.ctotal{background:rgba(36,48,90,.85)}
+.thread .tfill{border:0;box-shadow:0 2px 8px rgba(224,33,154,.35)}
+.split{border:1px solid var(--glass-edge)}
+.col-bar{border:0}
+.fact{background:var(--glass)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #list li{background:rgba(30,36,58,.72)!important}:root:not([data-theme="light"]) #list li.is-sold{background:rgba(40,70,48,.7)!important}:root:not([data-theme="light"]) .price{background:rgba(255,255,255,.08)}:root:not([data-theme="light"]) #list li::before{box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tile,.sub,.log,.add,.card,.gpwrap,.search,.scanbox{background:var(--glass-strong)!important}}
+
+/* ===== Liquid glass pass (iOS 26 style) ===== */
+:root{
+  --fg:#1B2244; --muted:#4B5478;
+  --lg:linear-gradient(135deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.28) 55%,rgba(255,255,255,.4) 100%);
+  --lg-strong:linear-gradient(135deg,rgba(255,255,255,.82) 0%,rgba(255,255,255,.58) 100%);
+  --lg-edge:rgba(255,255,255,.7);
+  --lg-shine:inset 1.5px 1.5px 0 rgba(255,255,255,.95),inset -1px -1px 0 rgba(255,255,255,.35),inset 0 0 22px rgba(255,255,255,.25);
+  --lg-shadow:0 12px 34px rgba(70,90,170,.16);
+  --blur:blur(26px) saturate(190%);
+  --blobs:radial-gradient(60% 35% at 15% 0%,rgba(255,255,255,.9) 0,transparent 70%),radial-gradient(50% 45% at 100% 30%,#C9B8F4 0,transparent 70%),radial-gradient(55% 45% at 0% 60%,#A9CBF5 0,transparent 70%),radial-gradient(60% 45% at 90% 100%,#F8BFDC 0,transparent 70%),linear-gradient(175deg,#B7D2F4 0%,#D9D3F3 45%,#F5D3E6 100%);
+  --tint-keep:linear-gradient(135deg,rgba(255,190,225,.75),rgba(255,214,236,.35));
+  --tint-left:linear-gradient(135deg,rgba(255,226,140,.7),rgba(255,240,190,.3));
+  --tint-count:linear-gradient(135deg,rgba(205,240,160,.75),rgba(228,248,200,.3));
+  --chip-on:#F7F1A1;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --fg:#F2F3FA; --muted:#BFC5DD;
+  --lg:linear-gradient(135deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.05) 60%,rgba(255,255,255,.1) 100%);
+  --lg-strong:linear-gradient(135deg,rgba(40,46,80,.8) 0%,rgba(30,34,60,.65) 100%);
+  --lg-edge:rgba(255,255,255,.22);
+  --lg-shine:inset 1.5px 1.5px 0 rgba(255,255,255,.35),inset -1px -1px 0 rgba(255,255,255,.08),inset 0 0 22px rgba(255,255,255,.05);
+  --lg-shadow:0 12px 34px rgba(0,0,0,.4);
+  --blobs:radial-gradient(50% 45% at 100% 20%,#3C2D7A 0,transparent 70%),radial-gradient(55% 45% at 0% 55%,#1E3F7A 0,transparent 70%),radial-gradient(60% 45% at 90% 100%,#6A2350 0,transparent 70%),linear-gradient(175deg,#121a33,#1a1530);
+  --tint-keep:linear-gradient(135deg,rgba(255,93,177,.32),rgba(255,93,177,.1));
+  --tint-left:linear-gradient(135deg,rgba(246,196,69,.28),rgba(246,196,69,.08));
+  --tint-count:linear-gradient(135deg,rgba(150,210,90,.28),rgba(150,210,90,.08));
+  --chip-on:#E9E28A}}
+html{background:#C9D6F2}
+.tile,.sub,.log,.add,.card,.gpwrap,.search,.scanbox,.pin,.patch,.ghostbtn,.pbtn,.tabs button,.sortby select,.views{
+  background:var(--lg)!important;border:1px solid var(--lg-edge)!important;box-shadow:var(--lg-shine),var(--lg-shadow)!important;
+  -webkit-backdrop-filter:var(--blur)!important;backdrop-filter:var(--blur)!important;outline:none}
+.tile,.sub,.log,.add,.card,.gpwrap,.scanbox,.pin{border-radius:28px!important}
+.t-keep{background:var(--tint-keep)!important}.t-left{background:var(--tint-left)!important}.t-count{background:var(--tint-count)!important}
+.patch{border-radius:30px!important;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(214,200,250,.35) 60%,rgba(255,200,230,.45))!important;color:var(--fg)}
+.patch .big,#vStats .patch .big{color:var(--fg);font-weight:700;font-stretch:90%}
+.t-col .plabel2,.plabel2,.patch .fee span{color:var(--muted)}
+#vStats .patch .keep,.patch #sNet{color:#C2187F}
+#vStats .patch .cutv,.patch .fee b{color:var(--fg)}
+#vStats .patch .cutv{color:var(--muted)}
+h1 span{font-weight:700;font-stretch:95%;font-size:32px}
+.tile b{font-weight:700;font-stretch:92%}
+.search{border-radius:999px!important;padding:0 16px}
+.tabs button,.sortby select{border-radius:999px!important}
+.tabs button[aria-pressed="true"]{background:var(--chip-on)!important;color:#1B2244!important}
+.sortby select{padding:8px 14px}
+.ghostbtn,.pbtn{border-radius:999px!important}
+.scanbtn{border-radius:999px;border:1px solid rgba(255,255,255,.55);background:linear-gradient(135deg,rgba(240,58,166,.92),rgba(160,80,230,.85));box-shadow:inset 1.5px 1.5px 0 rgba(255,255,255,.6),0 14px 30px rgba(190,60,170,.35);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.addbtn,.pbtn.primary,.seg button[aria-pressed="true"]{background:linear-gradient(135deg,#EE3AA4,#A456E3)!important;border:1px solid rgba(255,255,255,.5)!important;color:#fff!important;border-radius:999px}
+#list li{background:var(--lg-strong)!important;border:1px solid var(--lg-edge)!important;box-shadow:var(--lg-shine),0 8px 22px rgba(70,90,170,.12)!important;border-radius:16px 26px 26px 16px}
+#list li.is-sold{background:linear-gradient(135deg,rgba(214,244,200,.85),rgba(236,250,226,.6))!important}
+#list li::after{opacity:.2}
+li img{border-radius:14px}
+.price{background:rgba(255,255,255,.5);border:1px solid var(--lg-edge);border-radius:999px;padding:0 10px}
+.views{left:16px;right:16px;border-radius:999px!important;padding:4px!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.views button{color:var(--muted);border-radius:999px;padding:12px 4px}
+.views button[aria-pressed="true"]{background:rgba(255,255,255,.75);color:var(--fg);box-shadow:inset 1px 1px 0 #fff,0 4px 12px rgba(70,90,170,.15)}
+.views button[aria-pressed="true"]::after{display:none}
+.undobar{background:var(--lg-strong);color:var(--fg);border:1px solid var(--lg-edge);box-shadow:var(--lg-shine),var(--lg-shadow)}
+#undoBtn{background:var(--fg);color:#fff;border-radius:999px}
+#undoClose{color:var(--fg)}
+.citem{background:rgba(255,255,255,.55);border:1px solid var(--lg-edge);border-radius:18px}
+.ctotal{background:linear-gradient(135deg,#EE3AA4,#A456E3);border-radius:20px}
+.scanwrap{background:rgba(120,140,200,.25);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.thread{border-top-color:rgba(27,34,68,.2)}
+.thread .tfill{background:linear-gradient(90deg,#EE3AA4,#A456E3)}
+.seg0{background:#EE3AA4}.seg1{background:#7B8FE0}.seg2{background:#5FBF8A}.seg3{background:#F2B23A}
+.col-bar{background:linear-gradient(180deg,#9AAAF0,#6E7FD6)}
+.col.peak .col-bar{background:linear-gradient(180deg,#F35DB6,#C2187F)}
+.hb-fill{background:#A456E3}
+#list li.is-sold .num::after{border-radius:999px;transform:none;padding:0 8px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #list li{background:var(--lg-strong)!important}:root:not([data-theme="light"]) #list li.is-sold{background:linear-gradient(135deg,rgba(60,110,70,.6),rgba(40,70,50,.5))!important}:root:not([data-theme="light"]) .views button[aria-pressed="true"]{background:rgba(255,255,255,.18);color:#fff}:root:not([data-theme="light"]) .price{background:rgba(255,255,255,.08)}:root:not([data-theme="light"]) #vStats .patch .keep,:root:not([data-theme="light"]) .patch #sNet{color:#FF8AD0}:root:not([data-theme="light"]) .undobar #undoBtn{background:#fff;color:#1B2244}}
+.price{padding:0 6px!important}.rm{white-space:nowrap;text-align:left}
+
+/* ===== Gloss pass: top reflection + bright rim ===== */
+:root{
+  --gloss:linear-gradient(180deg,rgba(255,255,255,.7) 0%,rgba(255,255,255,.22) 34%,rgba(255,255,255,0) 52%);
+  --gloss-spot:radial-gradient(90% 55% at 18% -8%,rgba(255,255,255,.85) 0,rgba(255,255,255,0) 60%);
+  --rim:linear-gradient(140deg,rgba(255,255,255,1) 0%,rgba(255,255,255,.25) 35%,rgba(255,255,255,.08) 60%,rgba(255,255,255,.75) 100%);
+  --btn-gloss:linear-gradient(180deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.18) 48%,rgba(255,255,255,0) 50%);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --gloss:linear-gradient(180deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.06) 34%,rgba(255,255,255,0) 52%);
+  --gloss-spot:radial-gradient(90% 55% at 18% -8%,rgba(255,255,255,.28) 0,rgba(255,255,255,0) 60%);
+  --rim:linear-gradient(140deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.08) 35%,rgba(255,255,255,.03) 60%,rgba(255,255,255,.3) 100%);
+  --btn-gloss:linear-gradient(180deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.1) 48%,rgba(255,255,255,0) 50%)}}
+.tile,.sub,.log,.add,.card,.gpwrap,.patch,.scanbox,.pin{position:relative;isolation:isolate;border-color:transparent!important}
+.tile::before,.sub::before,.log::before,.add::before,.card::before,.gpwrap::before,.patch::before,.scanbox::before,.pin::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;background:var(--gloss-spot),var(--gloss)}
+.tile::after,.sub::after,.log::after,.add::after,.card::after,.gpwrap::after,.patch::after,.scanbox::after,.pin::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1.5px;background:var(--rim);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+/* bag rows: gloss painted into the background (no extra layers, light on the phone) */
+#list li{background:var(--gloss-spot),var(--gloss),var(--lg-strong)!important}
+#list li.is-sold{background:var(--gloss-spot),var(--gloss),linear-gradient(135deg,rgba(214,244,200,.85),rgba(236,250,226,.6))!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #list li{background:var(--gloss),var(--lg-strong)!important}:root:not([data-theme="light"]) #list li.is-sold{background:var(--gloss),linear-gradient(135deg,rgba(60,110,70,.6),rgba(40,70,50,.5))!important}}
+/* candy-gloss buttons and pills */
+.scanbtn{background:var(--btn-gloss),linear-gradient(135deg,#F03AA6,#A456E3);text-shadow:0 1px 2px rgba(120,20,90,.35)}
+.addbtn,.pbtn.primary,.seg button[aria-pressed="true"],.ctotal{background:var(--btn-gloss),linear-gradient(135deg,#EE3AA4,#A456E3)!important}
+.tabs button,.ghostbtn,.pbtn,.sortby select,.search,.price,.views{background:var(--btn-gloss),var(--lg)!important}
+.tabs button[aria-pressed="true"]{background:var(--btn-gloss),var(--chip-on)!important}
+.views button[aria-pressed="true"]{background:var(--btn-gloss),rgba(255,255,255,.8)}
+.thread .tfill{background:var(--btn-gloss),linear-gradient(90deg,#EE3AA4,#A456E3)}
+.patch{background:var(--gloss-spot),linear-gradient(135deg,rgba(255,255,255,.5),rgba(214,200,250,.35) 60%,rgba(255,200,230,.45))!important}
+.t-keep{background:var(--tint-keep)!important}.t-left{background:var(--tint-left)!important}.t-count{background:var(--tint-count)!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .patch .plabel2,:root:not([data-theme="light"]) .patch .fee span{color:#E6E9F5}}
+
+/* ===== Grid backdrop: glass floats over a grid (Liquid Glass Kit look) ===== */
+:root{
+  --grid:linear-gradient(rgba(70,55,130,.20) 1px,transparent 1px) 0 0/64px 64px,linear-gradient(90deg,rgba(70,55,130,.20) 1px,transparent 1px) 0 0/64px 64px;
+  --blur:blur(7px) saturate(170%);
+  --lg:linear-gradient(135deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.16) 55%,rgba(255,255,255,.3) 100%);
+  --lg-shine:inset 0 0 0 1px rgba(255,255,255,.45),inset 3px 3px 8px rgba(255,255,255,.75),inset -4px -5px 12px rgba(90,70,150,.16);
+  --lg-shadow:0 16px 36px rgba(80,70,150,.18),0 2px 6px rgba(80,70,150,.08);
+  --blobs:radial-gradient(60% 35% at 15% 0%,rgba(255,255,255,.75) 0,transparent 70%),radial-gradient(55% 45% at 100% 30%,#CDBFF2 0,transparent 70%),radial-gradient(60% 45% at 0% 65%,#BBCDF2 0,transparent 70%),radial-gradient(60% 45% at 90% 100%,#F3C6DD 0,transparent 70%),linear-gradient(175deg,#CDC6E8 0%,#D9D2EE 50%,#E8D3E6 100%);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --grid:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px) 0 0/64px 64px,linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px) 0 0/64px 64px;
+  --lg:linear-gradient(135deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.04) 60%,rgba(255,255,255,.08) 100%);
+  --lg-shine:inset 0 0 0 1px rgba(255,255,255,.14),inset 3px 3px 8px rgba(255,255,255,.18),inset -4px -5px 12px rgba(0,0,0,.25)}}
+body::after{background:var(--grid),var(--blobs)}
+/* bag rows sit over the grid too: lighter glass so lines show faintly */
+#list li{background:var(--gloss-spot),var(--gloss),linear-gradient(135deg,rgba(255,255,255,.72),rgba(255,255,255,.5))!important;box-shadow:var(--lg-shine),0 10px 24px rgba(80,70,150,.12)!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #list li{background:var(--gloss),linear-gradient(135deg,rgba(40,44,80,.72),rgba(30,32,60,.6))!important}}
+.scanbtn{box-shadow:inset 0 0 0 1px rgba(255,255,255,.45),inset 3px 3px 8px rgba(255,255,255,.55),inset -4px -6px 12px rgba(90,20,110,.3),0 16px 30px rgba(190,60,170,.32)}
+
+/* clearer glass so the grid reads through it */
+:root{
+  --blur:blur(4px) saturate(160%);
+  --lg:linear-gradient(135deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,.08) 55%,rgba(255,255,255,.18) 100%);
+  --gloss:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.14) 30%,rgba(255,255,255,0) 48%);
+  --gloss-spot:radial-gradient(80% 50% at 18% -8%,rgba(255,255,255,.6) 0,rgba(255,255,255,0) 60%);
+  --tint-keep:linear-gradient(135deg,rgba(255,170,215,.42),rgba(255,200,230,.12));
+  --tint-left:linear-gradient(135deg,rgba(255,215,120,.42),rgba(255,235,180,.1));
+  --tint-count:linear-gradient(135deg,rgba(190,235,140,.42),rgba(220,245,190,.1));
+}
+.patch{background:var(--gloss-spot),linear-gradient(135deg,rgba(255,255,255,.3),rgba(214,200,250,.14) 60%,rgba(255,200,230,.24))!important}
+.sub,.card,.log,.add,.gpwrap{background:var(--lg)!important}
+:root{--blur:blur(1.2px) saturate(150%)}
+
+/* ===== Liquid glass: edges bend what's behind (Chrome/Android); others keep the soft blur ===== */
+.tile,.patch,.sub,.views,.scanbtn{-webkit-backdrop-filter:blur(1.2px) saturate(150%);backdrop-filter:url(#liquid) saturate(150%)!important}
+.tile,.patch{background:var(--gloss-spot),linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.06) 60%,rgba(255,255,255,.14))!important}
+.t-keep{background:var(--gloss-spot),linear-gradient(135deg,rgba(255,170,215,.3),rgba(255,200,230,.06))!important}
+.t-left{background:var(--gloss-spot),linear-gradient(135deg,rgba(255,215,120,.3),rgba(255,235,180,.05))!important}
+.t-count{background:var(--gloss-spot),linear-gradient(135deg,rgba(190,235,140,.3),rgba(220,245,190,.05))!important}
+:root{--lg-shine:inset 0 2px 1px rgba(255,255,255,.95),inset 2px 0 1px rgba(255,255,255,.6),inset 0 -3px 6px rgba(70,55,130,.22),inset -2px 0 4px rgba(70,55,130,.12),inset 0 0 18px rgba(255,255,255,.25)}
+.tile,.patch,.sub{box-shadow:var(--lg-shine),0 18px 34px rgba(70,55,130,.2),0 2px 4px rgba(70,55,130,.12)!important}
+
+/* ===== Cohesion pass: one font, one shape language, one label style ===== */
+:root{--display:"Figtree",ui-sans-serif,system-ui,sans-serif;--body:"Figtree",ui-sans-serif,system-ui,sans-serif;--r-card:26px;--r-tag:22px;--hair:rgba(40,40,90,.12)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--hair:rgba(255,255,255,.12)}}
+html,body,button,input,select,textarea{font-family:var(--body)}
+*{font-stretch:normal!important;font-variant-numeric:tabular-nums}
+body{font-size:16px;letter-spacing:-.005em}
+/* type scale: 32 title / 40 hero number / 24 tile number / 18 card title / 16 body / 14 label */
+h1 span{font:800 30px/1.1 var(--display);letter-spacing:-.025em}
+.patch .big,#vStats .patch .big{font:800 42px/1.05 var(--display)!important;letter-spacing:-.03em}
+.tile b,.pair b,#vStats .patch .fee b,.spn b,.fact b{font:750 24px/1.15 var(--display)!important;letter-spacing:-.02em}
+.spn b{font-size:34px!important}
+.card h2,.log h2,.add h2,.sub h2{font:700 18px/1.3 var(--display)!important;letter-spacing:-.01em;margin:0 0 6px}
+.tile span,.plabel2,.patch .fee span,.sub span,.rrow span,.cap,.num,.fld span,.sortby,.hideold,.status,.stfilt{font-weight:500;letter-spacing:0}
+.tile span,.plabel2,.patch .fee span{font-size:14px;color:var(--muted)!important}
+.num{font-size:13px;text-transform:none;color:var(--muted)}
+.name{font:650 16px/1.3 var(--display)}
+.tag,.meta,.bnote{font-size:14px}
+.sub strong,.rrow b,.lrow b,.hb-top b{font-weight:700;font-family:var(--display)}
+.scanbtn{font:700 18px var(--display)!important;letter-spacing:-.01em}
+.tabs button,.seg button,.pbtn,.ghostbtn,.addbtn,.sortby select,.views button{font-family:var(--body)!important;font-weight:600!important}
+/* one shape language: cards 26, tags 22, everything else is a pill */
+.tile,.sub,.log,.add,.card,.gpwrap,.scanbox,.pin,.patch{border-radius:var(--r-card)!important}
+#list li{border-radius:var(--r-tag)!important;padding:10px 12px 10px 12px!important;grid-template-columns:64px minmax(0,1fr) auto}
+.citem,.panel{border-radius:18px}
+li img{border-radius:16px}
+/* remove the sewn details that clash with glass */
+#list li::before,#list li::after{display:none}
+#list li.is-sold .num::after{content:"Sold";border:0;transform:none;margin-left:8px;padding:1px 9px;border-radius:999px;background:var(--sold);color:#fff;font:700 12px var(--body)}
+.rrow,.lrow,.sub span,.logdd,.log li,.citem,.spool .rcpt{border-top:1px solid var(--hair)!important}
+.rrow:first-child,.lrow:first-child,.sub h2+span,.log li:first-child{border-top:0!important}
+.cols{border-bottom:1px solid var(--hair)}
+.thread{border-top:0!important;height:8px!important;background:rgba(120,110,190,.18);border-radius:999px;top:0!important}
+.thread .tfill{top:0!important;height:8px!important;border-radius:999px}
+.thread.big,.thread.big .tfill{height:12px!important}
+.paychip{background:rgba(120,110,190,.18);color:var(--fg);font-weight:600}
+.paidchip{background:rgba(95,191,138,.22);color:var(--fg);font-weight:600}
+.tag.changed{color:#B0408A}
+.rm{color:var(--muted);font-weight:600;text-decoration-thickness:1px;text-underline-offset:3px}
+.stfilt summary u,.logdd summary{color:#B0408A}
+.undolink{background:rgba(255,255,255,.5);border:1px solid var(--glass-edge,rgba(255,255,255,.7));color:var(--fg);border-radius:999px;font-weight:600}
+.chk{accent-color:#B0408A;border-radius:8px}
+
+/* ===== Hand-sewn details, glass edition (one stitch style everywhere) ===== */
+:root{--stitch:rgba(214,38,150,.42);--stitch-light:rgba(255,255,255,.7);--stitch-w:1.5px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--stitch:rgba(255,120,200,.45);--stitch-light:rgba(255,255,255,.4)}}
+/* cards and tiles: a running stitch just inside the edge */
+.patch,.tile,.sub,.card,.log,.add,.gpwrap,.scanbox{outline:var(--stitch-w) dashed var(--stitch)!important;outline-offset:-8px!important}
+.t-col{outline-offset:-9px!important}
+/* bag rows are hang tags again: glass eyelet + stitched edge */
+#list li{position:relative;padding-left:30px!important}
+#list li::before{display:block!important;content:"";position:absolute;left:10px;top:50%;width:11px;height:11px;margin-top:-5.5px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.95),rgba(255,255,255,.35) 60%,rgba(120,110,190,.25));box-shadow:inset 0 0 0 1.5px rgba(120,110,190,.45),0 1px 2px rgba(70,55,130,.2)}
+#list li::after{display:block!important;content:"";position:absolute;inset:6px 6px 6px 26px;border:var(--stitch-w) dashed var(--stitch);border-radius:calc(var(--r-tag) - 6px);opacity:1;pointer-events:none}
+#list li.is-sold::after{border-color:rgba(60,150,100,.5)}
+#list li > *{position:relative;z-index:1}
+/* scan button: white thread stitched inside the pill */
+.scanbtn{outline:var(--stitch-w) dashed var(--stitch-light);outline-offset:-6px}
+/* bottom menu: the open page is a stitched patch */
+.views button[aria-pressed="true"]{outline:var(--stitch-w) dashed var(--stitch);outline-offset:-4px}
+/* sold chip stitched with white thread */
+#list li.is-sold .num::after{outline:1px dashed rgba(255,255,255,.8);outline-offset:-3px;padding:2px 10px}
+/* progress = a thread being sewn: dashed stitches over the pink fill */
+.thread .tfill{background:repeating-linear-gradient(90deg,rgba(255,255,255,.75) 0 6px,transparent 6px 11px) center/100% 2px no-repeat,var(--btn-gloss),linear-gradient(90deg,#EE3AA4,#A456E3)!important}
+.thread{background:repeating-linear-gradient(90deg,rgba(120,110,190,.35) 0 6px,transparent 6px 11px) center/100% 2px no-repeat,rgba(120,110,190,.12)!important}
+/* card titles get a short thread underline */
+.card h2::after,.sub h2::after,.log h2::after,.add h2::after{content:"";display:block;width:34px;margin-top:6px;border-top:2px dashed var(--stitch)}
+/* the logo already has the needle; let the title sit on a thread line */
+header h1{padding-bottom:10px;background:repeating-linear-gradient(90deg,var(--stitch) 0 7px,transparent 7px 12px) 0 100%/100% 1.5px no-repeat}
+.views{background:var(--btn-gloss),rgba(255,255,255,.74)!important;-webkit-backdrop-filter:blur(16px) saturate(170%)!important;backdrop-filter:blur(16px) saturate(170%)!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .views{background:var(--btn-gloss),rgba(28,32,58,.82)!important}}
+
+.pend{margin:0 0 14px;padding:16px;border-radius:var(--r-card,26px);background:var(--gloss,none),linear-gradient(135deg,rgba(255,236,180,.75),rgba(255,248,220,.55));border:1px solid rgba(255,255,255,.75);box-shadow:var(--lg-shine,none),0 12px 28px rgba(150,110,20,.18);outline:1.5px dashed rgba(176,112,15,.5);outline-offset:-8px}
+.pend h2{font:700 17px/1.3 var(--display);margin:0 0 2px;color:#5A3A00}
+.pend ul{list-style:none;margin:8px 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+.pend li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;background:rgba(255,255,255,.6);border-radius:16px;padding:10px 12px;border:0;box-shadow:none;font-size:15px}
+.pend li small{grid-column:1;color:var(--muted);font-size:13px}
+.pend li .pbtn{grid-column:2;grid-row:1/span 2;padding:6px 12px;font-size:14px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pend{background:linear-gradient(135deg,rgba(90,70,20,.6),rgba(60,48,20,.5))}:root:not([data-theme="light"]) .pend h2{color:#FFE3A0}:root:not([data-theme="light"]) .pend li{background:rgba(255,255,255,.08)}}
+</style>
+
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="liquid" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB"><feImage href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABN0lEQVR42u3dsQ6CMABF0afhw/1saEtxMLg4uVBjzw2Tm+8spJBw6/1xJHvSkpqUZEu2ZP24Xr+XpCY1aUlLerInx3lN0vv/7kk/p6jfDNjO3ZaJZvvJluxGGAvQjDAWoBphLEAxwliAzQgApgZYjQAAgAAAEAC3oQLgKEIO4wDI8wAAugagG8Ez4akBvBUBAICGdTcBAAACAEAAAAgAAAEAIAAABACAAAAQAAACAEAAAAgAAAEAIAAABACAAAAQAAACAEAAAAgAAAEAIAAABACAAAAQAAACAEAAAAgAAAEAIAAABACAAAAAIAAABACAAAAQAAACAEAA4muqAgBAvin/9wDdCGMBmhEATA1QjQBgaoBihLEAmxEATA2wGgEAAAEAIABuQwXAUYQcxnkeIM+EvRWhK3oC3wdl5PlgehMAAAAASUVORK5CYII=" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/><feGaussianBlur in="SourceGraphic" stdDeviation="0.002" result="soft"/><feDisplacementMap in="soft" in2="map" scale="0.2" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<div class="wrap">
+  <header>
+    <h1><img class="logo" src="data:image/webp;base64,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" alt="Jen" width="72" height="48"><span>Bags sale</span></h1>
+    <section class="pend" id="pendBox" hidden aria-live="polite">
+      <h2 id="pendTitle"></h2>
+      <p class="cap" id="pendCap"></p>
+      <ul id="pendList"></ul>
+      <div class="prow"><button type="button" class="pbtn primary" id="pendSave">Save these changes</button><button type="button" class="pbtn" id="pendDrop">Discard and load from the sheet</button></div>
+      <p class="add-msg" id="pendMsg"></p>
+    </section>
+    <div class="bento">
+      <section class="patch tile t-col" aria-label="Money collected"><span class="plabel2">Collected</span><b id="sSoldAmt" class="big">₱0</b></section>
+      <div class="tile t-keep"><span>You keep (70%)</span><b id="sNet">₱0</b></div>
+      <div class="tile t-cut"><span>30% cut taken</span><b id="sFee">₱0</b></div>
+      <div class="tile t-left"><span>Unsold value</span><b id="sLeftAmt">₱0</b></div>
+      <div class="tile t-count"><span>Bags sold</span><b id="sCount">0/38</b></div>
+    </div>
+    <div class="sub"><h2>If everything sells</h2><span>Total <strong id="sAll">₱0</strong></span><span>You keep (70%) <strong id="sAllNet">₱0</strong></span><span>30% cut taken <strong id="sAllCut">₱0</strong></span><span id="sTagWrap" hidden>Tag price total <strong id="sTag">₱0</strong></span><span id="sRemoved" class="subnote"></span></div>
+    <div class="status" id="status" aria-live="polite"></div>
+    <button type="button" class="undolink" id="undoLast" hidden>↶ Undo last change</button>
+    <form class="pin" id="pinForm" hidden>
+      <p id="pinMsg"></p>
+      <div class="add-row"><label class="fld grow" for="pinIn"><span>Helper PIN</span><input id="pinIn" type="password" inputmode="numeric" autocomplete="off"></label><button type="submit" class="addbtn">Save PIN</button></div>
+    </form>
+  </header>
+
+  <nav class="views" aria-label="Page sections">
+    <button type="button" data-v="vBags" aria-pressed="true">Bags</button>
+    <button type="button" data-v="vStats" aria-pressed="false">Statistics</button>
+    <button type="button" data-v="vHelp" aria-pressed="false">How to use</button>
+  </nav>
+
+  <div id="vBags">
+  <button type="button" class="scanbtn" id="scanBtn"><svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 12h8"/></svg>Scan QR to sell</button>
+  <form class="search" id="searchForm" role="search">
+    <label for="q" class="sr">Search bags</label>
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input id="q" type="search" placeholder="Search bag no. or name, e.g. 12 or denim" autocomplete="off" enterkeyhint="search">
+    <button type="button" id="qClear" class="qclear" aria-label="Clear search" hidden>×</button>
+  </form>
+  <div class="tabs" role="group" aria-label="Filter bags">
+    <button id="fAll" aria-pressed="true" data-f="all">All</button>
+    <button id="fLeft" aria-pressed="false" data-f="left">Not sold</button>
+    <button id="fSold" aria-pressed="false" data-f="sold">Sold</button>
+    <button id="fRem" aria-pressed="false" data-f="removed">Removed</button>
+  </div>
+  <label class="sortby" for="sortBy"><span>Sort by</span><select id="sortBy"><option value="num">Bag number</option><option value="low">Price: lowest to highest</option><option value="high">Price: highest to lowest</option></select></label>
+  <label class="hideold" for="hideOld"><input type="checkbox" id="hideOld"><span>Hide bags sold before today <b id="oldCount"></b></span></label>
+  <details class="gpwrap" id="gpWrap"><summary>Change prices of a group</summary>
+    <p class="cap">Changes every unsold bag with that price. Sold bags stay the same.</p>
+    <div class="gprow"><label class="fld" for="gpFrom"><span>All unsold bags at ₱</span><input id="gpFrom" type="number" inputmode="numeric" min="0" class="numfld" placeholder="50"></label>
+    <label class="fld" for="gpTo"><span>Change to ₱</span><input id="gpTo" type="number" inputmode="numeric" min="0" class="numfld" placeholder="40"></label>
+    <button type="button" class="addbtn" id="gpBtn">Change prices</button></div>
+    <p class="add-msg" id="gpMsg" aria-live="polite"></p></details>
+  <p class="add-msg" id="qMsg" aria-live="polite"></p>
+  <ul id="list"></ul>
+  <p class="add-msg" id="listMsg" aria-live="polite"></p>
+  <section class="log" aria-labelledby="logH">
+    <div class="log-head"><h2 id="logH">Sales log</h2><span id="logCount"></span></div>
+    <p class="paybreak" id="payBreak"></p>
+    <div class="pdfrow"><label class="fld" for="pdfRange"><span>Invoice covers</span><select id="pdfRange"><option value="all">All sales</option></select></label><label class="fld" for="pdfDate"><span>Invoice date</span><input id="pdfDate" type="date" class="datefld"></label><button type="button" class="addbtn" id="pdfBtn">Export invoice PDF</button></div>
+    <div class="pdfrow"><button type="button" class="addbtn" id="paidBtn">Mark invoice as paid</button><button type="button" class="ghostbtn" id="unpaidBtn">Mark as unpaid</button></div>
+    <p class="add-msg" id="pdfMsg" aria-live="polite"></p>
+    <details class="logdd" id="logWrap"><summary id="logSum">Show sales</summary>
+    <ol id="log"></ol>
+    </details>
+  </section>
+  <form class="add" id="addForm" novalidate>
+    <h2>Add a bag</h2>
+    <div class="add-row">
+      <label class="fld grow" for="addName"><span>Description</span><input id="addName" type="text" maxlength="60" placeholder="e.g. Red denim tote" required></label>
+      <label class="fld" for="addNum"><span>Bag no.</span><input id="addNum" type="number" inputmode="numeric" min="1" class="numfld"></label>
+      <label class="fld" for="addPrice"><span>Price (₱)</span><input id="addPrice" type="number" inputmode="numeric" min="0" placeholder="150" required></label>
+    </div>
+    <div class="add-row">
+      <label class="fld grow" for="addPhoto"><span>Photo (optional)</span><input id="addPhoto" type="file" accept="image/*"></label>
+      <button type="submit" id="addBtn" class="addbtn">Add bag</button>
+    </div>
+    <p class="add-msg" id="addMsg" aria-live="polite"></p>
+  </form>
+  <p class="note">Tick the box when a bag sells. If the buyer bargains, type the new price. Totals update right away. Tap a photo to see it bigger.</p>
+  </div>
+
+  <section id="vStats" hidden aria-label="Statistics">
+    <details class="stfilt"><summary><span>Showing</span> <b id="totCap"></b> <u>Change</u></summary>
+      <div class="statfilter">
+        <label class="fld" for="stFrom"><span>From</span><input id="stFrom" type="date" class="datefld"></label>
+        <label class="fld" for="stTo"><span>Up to</span><input id="stTo" type="date" class="datefld"></label>
+        <label class="fld" for="stPaid"><span>Show</span><select id="stPaid"><option value="all">All sales</option><option value="unpaid">Unpaid only</option><option value="paid">Paid only</option></select></label>
+        <button type="button" class="ghostbtn" id="stClear">Show everything</button>
+      </div>
+    </details>
+    <section class="patch" aria-label="Money for the dates shown">
+      <span class="plabel2">Collected, <span id="stCount"></span></span>
+      <b id="stCollected" class="big">₱0</b>
+      <div class="fee"><div><span>You keep (70%)</span><b id="stKeep" class="keep">₱0</b></div><div><span>30% cut taken</span><b id="stCut" class="cutv">₱0</b></div></div>
+    </section>
+    <div class="card spool"><h2>The whole sale</h2>
+      <p class="spn"><b id="stSoldN">0</b> of <span id="stAllN">0</span> bags sold</p>
+      <div id="stThread"></div>
+      <p class="cap" id="stLeft"></p>
+      <div id="totFacts" class="rcpt"></div>
+    </div>
+    <div class="card"><h2>Quick facts</h2><div id="facts" class="rcpt"></div></div>
+    <div class="card"><h2>Sales per day</h2><p class="cap">Money collected each day and how many bags sold.</p><div id="chDay"></div></div>
+    <div class="card"><h2>When bags sell</h2><p class="cap">Bags sold by hour, all days together. The busiest hour is pink.</p><div id="chHour"></div></div>
+    <div class="card"><h2>How people paid</h2><p class="cap">Share of the money by payment method.</p><div id="chPay"></div></div>
+    <div class="card"><h2>Sold by price</h2><p class="cap">Bags sold in each price range, out of all bags in that range.</p><div id="chPrice"></div></div>
+  </section>
+
+  <section id="vHelp" hidden aria-label="How to use">
+    <div class="card pincard">
+      <h2>Helper PIN</h2>
+      <p class="cap" id="pinState"></p>
+      <details id="pinChange"><summary>Change the PIN</summary>
+        <form id="pinChForm" novalidate>
+          <div class="add-row">
+            <label class="fld" for="pcOld"><span>Current PIN</span><input id="pcOld" type="password" inputmode="numeric" autocomplete="off"></label>
+            <label class="fld" for="pcNew"><span>New PIN</span><input id="pcNew" type="password" inputmode="numeric" autocomplete="off"></label>
+            <label class="fld" for="pcNew2"><span>Type it again</span><input id="pcNew2" type="password" inputmode="numeric" autocomplete="off"></label>
+          </div>
+          <button type="submit" class="addbtn" id="pcBtn">Change PIN</button>
+          <p class="add-msg" id="pcMsg" aria-live="polite"></p>
+        </form>
+      </details>
+      <button type="button" class="ghostbtn" id="pinForget">Forget the PIN on this phone</button>
+      <p class="add-msg" id="pfMsg" aria-live="polite"></p>
+    </div>
+    <div class="card help">
+      <h2>How to use this page</h2>
+      <h3>When a bag sells</h3>
+      <ol>
+        <li>Find the bag. Scroll, or type its number or name in the search box.</li>
+        <li>If the buyer bargained, type the new price in the ₱ box first.</li>
+        <li>Tick the box on the right.</li>
+        <li>Pick how they paid: Cash, GCash, Other (type it, like Maya), or N/A if you don't know.</li>
+        <li>Add a note if you want, like the buyer's name or GCash reference number. Tap <b>Mark sold</b>.</li>
+      </ol>
+      <h3>Selling with the QR sticker</h3>
+      <p>Tap <b>Scan QR to sell</b> and point the camera at each bag the buyer picked. They add up in a list with the total. Change a price if the buyer bargained, or tap × to take a bag off. Pick the payment once and tap <b>Mark sold</b>. Then tap <b>Next buyer</b>. Scanning a sticker with the phone camera also works.</p>
+      <h3>Changing prices of a group</h3>
+      <p>Open <b>Change prices of a group</b> under the search box. Type the current price and the new one, for example ₱50 to ₱40, and tap the button. Only unsold bags change. Tap <b>Undo</b> to change them back.</p>
+      <h3>Changing the helper PIN</h3>
+      <p>Use <b>Change the PIN</b> at the top of this page. Type the current PIN and the new one twice. Every other phone asks for the new PIN once. Use <b>Forget the PIN on this phone</b> on a phone that shouldn't make changes anymore.</p>
+      <h3>The first time on a phone</h3>
+      <p>The page asks for the helper PIN once. Type it and tap <b>Save PIN</b>. Without the PIN, changes stay on that phone only and don't save.</p>
+      <h3>Fixing mistakes</h3>
+      <ul>
+        <li><b>Undo:</b> after any change, tap <b>Undo</b> in the bar at the bottom, or <b>↶ Undo last change</b> under the totals.</li>
+        <li><b>Wrong payment:</b> tap <b>Change payment</b> under a sold bag.</li>
+        <li><b>Not really sold:</b> untick the box, then tap <b>Yes, unmark</b>.</li>
+      </ul>
+      <h3>Taking a bag out of the sale</h3>
+      <p>Tap <b>Remove from sale</b>, add a reason if you want, and tap <b>Remove bag</b>. It gets crossed out and left out of the totals. Leave "Renumber" off if the price tags are printed. Tap <b>Put back</b> to return it.</p>
+      <h3>Adding a new bag</h3>
+      <p>Scroll to <b>Add a bag</b>. Type a description, a bag number, and the price. Add a photo if you want, then tap <b>Add bag</b>.</p>
+      <h3>Finding bags</h3>
+      <ul>
+        <li>Use the buttons: <b>All</b>, <b>Not sold</b>, <b>Sold</b>, <b>Removed</b>.</li>
+        <li><b>Hide bags sold before today</b> keeps the list short. Totals still count every sale.</li>
+      </ul>
+      <h3>Invoice</h3>
+      <p>In <b>Sales log</b>, pick which sales to include and the invoice date, then tap <b>Export invoice PDF</b>. If it doesn't download, tap the link that appears to open it. Works best in Chrome or Safari, not inside Messenger.</p>
+      <h3>Marking an invoice paid</h3>
+      <p>Once the money for an invoice has been paid, go to <b>Sales log</b>, pick the same sales in <b>Invoice covers</b>, set the date it was paid in <b>Invoice date</b>, and tap <b>Mark invoice as paid</b>. Those sales get a <b>Paid</b> tag. Pick <b>Unpaid sales</b> to make an invoice of only what is still owed. <b>Mark as unpaid</b> and <b>Undo</b> fix a mistake. Paid marks are saved on this phone only for now.</p>
+      <h3>Statistics by date</h3>
+      <p>On <b>Statistics</b>, pick <b>From</b> and <b>Up to</b> dates and choose <b>All sales</b>, <b>Unpaid only</b> or <b>Paid only</b>. Bags sold, money collected, the 30% cut and the charts all follow your choice. Paid and unpaid amounts are shown side by side.</p>
+      <h3>Totals at the top</h3>
+      <ul>
+        <li><b>Collected:</b> money from bags sold.</li>
+        <li><b>Unsold value:</b> what the bags left would bring in.</li>
+        <li><b>You keep (70%)</b>: your share of the money collected. <b>30% cut taken</b>: the part that goes to the other side.</li>
+      </ul>
+      <p class="cap">Everything saves to the Google Sheet, so every phone sees the same list within a few seconds.</p>
+    </div>
+  </section>
+</div>
+<div class="undobar" id="undoBar" hidden role="status" aria-live="polite"><span id="undoText"></span><button type="button" id="undoBtn">Undo</button><button type="button" id="undoClose" aria-label="Close">×</button></div>
+<div class="zoom" id="zoom" hidden><img id="zoomImg" alt=""></div>
+
+<script>
+// ===== Google Apps Script web app link =====
+const API_URL = "https://script.google.com/macros/s/AKfycbyhI9AlL97-152nRg5eoJTfm1aT8SHn5eZXciZtRBCgKz9yITh2WNEF35DKj5e04nDG/exec";
+// ===========================================
+
+const BAGS = [{"id": "b01", "n": 1, "name": "Black & gold weave tote (A)", "tag": 250, "img": ""}, {"id": "b02", "n": 2, "name": "Black & gold weave tote (B)", "tag": 250, "img": ""}, {"id": "b03", "n": 3, "name": "Black floral sling", "tag": 80, "img": ""}, {"id": "b04", "n": 4, "name": "Denim drawstring bag", "tag": 250, "img": ""}, {"id": "b05", "n": 5, "name": "Denim bag with zip pocket", "tag": 200, "img": ""}, {"id": "b06", "n": 6, "name": "Red floral bag, pink handles", "tag": 250, "img": ""}, {"id": "b07", "n": 7, "name": "Orange bird-print bag", "tag": 300, "img": ""}, {"id": "b08", "n": 8, "name": "Navy floral denim bag", "tag": 450, "img": ""}, {"id": "b09", "n": 9, "name": "Floral & light denim tote", "tag": 350, "img": ""}, {"id": "b10", "n": 10, "name": "Light denim pocket tote", "tag": 150, "img": ""}, {"id": "b11", "n": 11, "name": "Blue print drawstring backpack", "tag": 150, "img": ""}, {"id": "b12", "n": 12, "name": "Patchwork denim tote", "tag": 250, "img": ""}, {"id": "b13", "n": 13, "name": "Dark denim sling", "tag": 150, "img": ""}, {"id": "b14", "n": 14, "name": "Black denim & floral backpack", "tag": 450, "img": ""}, {"id": "b15", "n": 15, "name": "Tulip print & denim tote", "tag": 350, "img": ""}, {"id": "b16", "n": 16, "name": "Green sling bag", "tag": 70, "img": ""}, {"id": "b17", "n": 17, "name": "Pink & black bag", "tag": 200, "img": ""}, {"id": "b18", "n": 18, "name": "Denim tote, purple handles", "tag": 120, "img": ""}, {"id": "b19", "n": 19, "name": "Black wave-pattern sling", "tag": 130, "img": ""}, {"id": "b20", "n": 20, "name": "Brown zigzag bag", "tag": 130, "img": ""}, {"id": "b21", "n": 21, "name": "Striped woven sling", "tag": 100, "img": ""}, {"id": "b22", "n": 22, "name": "Striped woven sling (green side)", "tag": 100, "img": ""}, {"id": "b23", "n": 23, "name": "Dark check bag", "tag": 100, "img": ""}, {"id": "b24", "n": 24, "name": "Pastel floral sling", "tag": 80, "img": ""}, {"id": "b25", "n": 25, "name": "Black & green drawstring", "tag": 100, "img": ""}, {"id": "b26", "n": 26, "name": "Black & white geometric sling", "tag": 80, "img": ""}, {"id": "b27", "n": 27, "name": "Light blue floral tote", "tag": 130, "img": ""}, {"id": "b28", "n": 28, "name": "Cream floral tote, purple trim", "tag": 130, "img": ""}, {"id": "b29", "n": 29, "name": "Mint green tote (A)", "tag": 150, "img": ""}, {"id": "b30", "n": 30, "name": "Mint green tote (B)", "tag": 150, "img": ""}, {"id": "b31", "n": 31, "name": "Black wave-pattern tote", "tag": 150, "img": ""}, {"id": "b32", "n": 32, "name": "Light blue printed tote", "tag": 150, "img": ""}, {"id": "b33", "n": 33, "name": "Blue polka-dot shirt tote", "tag": 150, "img": ""}, {"id": "b34", "n": 34, "name": "Black grid sling", "tag": 100, "img": ""}, {"id": "b35", "n": 35, "name": "Blue floral tote", "tag": 100, "img": ""}, {"id": "b36", "n": 36, "name": "Patchwork quilt tote", "tag": 100, "img": ""}, {"id": "b37", "n": 37, "name": "Grey speckled tote", "tag": 100, "img": ""}, {"id": "b38", "n": 38, "name": "Pink plaid tote", "tag": 100, "img": ""}];
+BAGS.forEach(b => { delete b.extra; });
+const state = {};
+BAGS.forEach(b => state[b.id] = {status: "available", price: b.tag, soldAt: null, pay: "", note: "", paid: ""});
+const PAYS = ["Cash", "GCash"];
+const CHOICES = ["Cash", "GCash", "Other", "N/A"];
+let filter = "all";
+let panel = null; // {id, type: "sell" | "remove" | "unsell"}
+const online = /^https:\/\/script\.google(usercontent)?\.com\//.test(API_URL);
+const peso = n => "₱" + Math.round(n).toLocaleString("en-PH");
+const $ = id => document.getElementById(id);
+const setStatus = t => { $("status").textContent = t; };
+const timeNow = () => new Date().toLocaleTimeString("en-PH", {hour: "numeric", minute: "2-digit"});
+const LS = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const LSset = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const PH = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#dde1ea"/><path d="M24 26c0-9 16-9 16 0" fill="none" stroke="#5f6880" stroke-width="3"/><path d="M17 26h30l3 22H14z" fill="#5f6880"/></svg>');
+
+let pin = LS("jb_pin") || "";
+let lastPay = LS("jb_lastpay") || "Cash";
+let queue = []; try { queue = JSON.parse(LS("jb_queue") || "[]"); } catch(e){ queue = []; }
+queue = queue.map(q => q.ids || (q.action === "delete" && q.id) ? q : q.action === "delete" ? {action: "delete", id: q.row.id} : {action: "batch", ids: [q.row.id]});
+// Changes left on this phone from an earlier day wait for a yes before they save.
+let holdQueue = queue.some(q => !q.at || new Date(q.at).toDateString() !== new Date().toDateString());
+let srvRows = {}; try { srvRows = JSON.parse(LS("jb_srv") || "{}"); } catch(e){ srvRows = {}; }
+
+function normStatus(v){
+  if (v.status === "available" || v.status === "sold" || v.status === "removed") return v.status;
+  return v.sold ? "sold" : "available";
+}
+function addExtra(id, v){
+  if (state[id]) return;
+  BAGS.push({id, n: Number(v.n) || 0, name: String(v.name || "Bag"), tag: Number(v.tag) || 0, img: typeof v.img === "string" && v.img.startsWith("data:image/") ? v.img : "", extra: true});
+  state[id] = {status: normStatus(v), price: typeof v.price === "number" ? v.price : Number(v.tag) || 0, soldAt: typeof v.soldAt === "number" ? v.soldAt : null, pay: v.pay || "", note: v.note || "", paid: v.paid || ""};
+}
+const bagOf = id => BAGS.find(x => x.id === id);
+function rowOf(id){
+  const b = bagOf(id), s = state[id];
+  return {id, n: b.n, name: b.name, tag: b.tag, price: s.price, status: s.status, sold: s.status === "sold", soldAt: s.status === "sold" ? (s.soldAt || null) : null, pay: s.status === "sold" ? s.pay : "", note: s.note || "", paid: s.status === "sold" ? (s.paid || "") : "", extra: !!b.extra, img: b.extra ? (b.img || "") : ""};
+}
+function saveLocal(){
+  const o = {bags: BAGS.map(b => ({...b, ...state[b.id]}))};
+  LSset("jb_v2", JSON.stringify(o)); LSset("jb_queue", JSON.stringify(queue));
+}
+function loadLocal(){
+  try {
+    const s = JSON.parse(LS("jb_v2") || "null");
+    if (s && s.bags){
+      s.bags.forEach(v => {
+        if (v.extra && !state[v.id]) addExtra(v.id, v);
+        const b = bagOf(v.id), st = state[v.id]; if (!b || !st) return;
+        b.n = Number(v.n) || b.n;
+        if (!b.img && typeof v.img === "string" && v.img.startsWith("data:image/")) b.img = v.img;
+        st.status = normStatus(v); st.price = typeof v.price === "number" ? v.price : st.price; st.soldAt = v.soldAt || null; st.pay = v.pay || ""; st.note = v.note || ""; st.paid = v.paid || "";
+      });
+      return;
+    }
+    const old = JSON.parse(LS("bagsale2") || "{}");
+    (old._extras || []).forEach(e => addExtra(e.id, e));
+    for (const k in old) if (state[k]){ const v = old[k]; state[k].status = v.sold ? "sold" : "available"; if (typeof v.price === "number") state[k].price = v.price; state[k].soldAt = v.soldAt || null; }
+  } catch(e){}
+}
+const active = () => BAGS.filter(b => state[b.id].status !== "removed");
+let sortMode = (() => { try { return localStorage.getItem("jb_sort") || "num"; } catch(e){ return "num"; } })();
+const sortedBags = () => BAGS.slice().sort((a, b) => {
+  const ra = state[a.id].status === "removed", rb = state[b.id].status === "removed";
+  if (ra !== rb) return ra ? 1 : -1;
+  if (sortMode === "low") return state[a.id].price - state[b.id].price || a.n - b.n;
+  if (sortMode === "high") return state[b.id].price - state[a.id].price || a.n - b.n;
+  return a.n - b.n;
+});
+
+function totals(){
+  let sold = 0, left = 0, n = 0, tag = 0, paidN = 0;
+  // Sales already on a paid invoice are left out of the top totals (they stay in Statistics).
+  active().forEach(b => { const s = state[b.id]; if (s.status === "sold" && s.paid){ paidN++; return; } tag += b.tag; if (s.status === "sold"){ sold += s.price; n++; } else left += s.price; });
+  const cut = Math.round(sold * 0.3);
+  $("sFee").textContent = peso(cut); $("sNet").textContent = peso(sold - cut);
+  $("sSoldAmt").textContent = peso(sold); $("sLeftAmt").textContent = peso(left);
+  $("sCount").textContent = n + "/" + (active().length - paidN); $("sAll").textContent = peso(sold + left); $("sAllCut").textContent = peso(Math.round((sold + left) * 0.3)); $("sAllNet").textContent = peso((sold + left) - Math.round((sold + left) * 0.3)); $("sTagWrap").hidden = tag === sold + left; $("sTag").textContent = peso(tag);
+  const removed = BAGS.length - active().length;
+  $("sRemoved").textContent = [removed ? removed + (removed === 1 ? " bag" : " bags") + " removed" : "", paidN ? paidN + " paid (see Statistics)" : ""].filter(Boolean).join(" · ");
+}
+function fmtTime(t){
+  const d = new Date(t), now = new Date();
+  const tm = d.toLocaleTimeString("en-PH", {hour: "numeric", minute: "2-digit"});
+  return d.toLocaleDateString("en-PH", {month: "short", day: "numeric", year: d.getFullYear() === now.getFullYear() ? undefined : "numeric"}) + ", " + tm;
+}
+const dayKey = t => { const d = new Date(t); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+const dayLabel = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-PH", {year: "numeric", month: "long", day: "numeric"}); };
+const paidDate = s => s.paid ? dayLabel(s.paid).replace(/, \d{4}$/, "") : "";
+function soldBags(range){
+  const want = range && range.startsWith("d:") ? range.slice(2) : null;
+  return BAGS.filter(b => state[b.id].status === "sold" && (range !== "unpaid" || !state[b.id].paid) && (!want || (state[b.id].soldAt && dayKey(state[b.id].soldAt) === want)))
+    .sort((a, b) => (state[a.id].soldAt || 0) - (state[b.id].soldAt || 0));
+}
+function byPay(list){
+  const t = {Cash: 0, GCash: 0};
+  list.forEach(b => { const s = state[b.id]; const k = s.pay && s.pay !== "N/A" ? s.pay : "Not set"; if (k !== "Not set") t[k] = (t[k] || 0) + s.price; });
+  const na = list.reduce((a, b) => a + (state[b.id].pay && state[b.id].pay !== "N/A" ? 0 : state[b.id].price), 0);
+  t["Not set"] = na;
+  return t;
+}
+function renderLog(){
+  const ol = $("log"); ol.textContent = "";
+  const sold = soldBags("all").reverse();
+  const sel = $("pdfRange"), keep = sel.value, days = {};
+  sold.forEach(b => { const t = state[b.id].soldAt; if (t){ const k = dayKey(t); days[k] = (days[k] || 0) + 1; } });
+  const dueN = sold.filter(b => !state[b.id].paid).length;
+  const opts = [["all", "All sales (" + sold.length + ")"], ["unpaid", "Unpaid sales (" + dueN + ")"]].concat(Object.keys(days).sort().reverse().map(k => ["d:" + k, dayLabel(k) + " (" + days[k] + ")"]));
+  if (sel.options.length !== opts.length || opts.some((o, i) => sel.options[i].value !== o[0] || sel.options[i].text !== o[1])){
+    sel.textContent = ""; opts.forEach(o => { const op = el("option", null, o[1]); op.value = o[0]; sel.appendChild(op); });
+    sel.value = opts.some(o => o[0] === keep) ? keep : "all";
+  }
+  $("logCount").textContent = sold.length ? sold.length + (sold.length === 1 ? " sale" : " sales") : "";
+  $("logSum").textContent = $("logWrap").open ? "Hide sales" : sold.length ? "Show all " + sold.length + (sold.length === 1 ? " sale" : " sales") : "No sales yet";
+  const t = byPay(sold);
+  const paidAmt = sold.filter(b => state[b.id].paid).reduce((a, b) => a + state[b.id].price, 0), allAmt = sold.reduce((a, b) => a + state[b.id].price, 0);
+  $("payBreak").textContent = sold.length ? Object.keys(t).filter(k => t[k] || PAYS.includes(k)).map(k => (k === "Not set" ? "Not identified" : k) + " " + peso(t[k])).join(" · ") + (paidAmt ? " · Paid " + peso(paidAmt) + " · Unpaid " + peso(allAmt - paidAmt) : "") : "";
+  if (!sold.length){ ol.appendChild(el("li", "none", "No sales yet. Tick a bag above when it sells and it shows up here.")); return; }
+  sold.forEach(b => {
+    const s = state[b.id], li = el("li");
+    const tm = el("time", null, s.soldAt ? fmtTime(s.soldAt) : "Time not saved");
+    const w = el("span", "what"); w.append(document.createTextNode("Bag " + b.n + " · " + b.name));
+    if (s.note) w.appendChild(el("small", "lognote", s.note));
+    const right = el("span", "amtcol");
+    right.append(el("span", "amt", peso(s.price)), el("span", "paychip" + (s.pay ? "" : " unset"), s.pay || "N/A"));
+    if (s.paid) right.appendChild(el("span", "paidchip", "Paid " + paidDate(s)));
+    li.append(tm, w, right); ol.appendChild(li);
+  });
+}
+
+function sellPanel(b, s, isEdit){
+  const box = el("div", "panel");
+  box.appendChild(el("p", "ptitle", isEdit ? "Change payment details" : "Mark Bag " + b.n + " as sold"));
+  const start = isEdit ? (s.pay || "N/A") : lastPay;
+  let pay = CHOICES.includes(start) && start !== "Other" ? start : "Other";
+  const grp = el("div", "seg"); grp.setAttribute("role", "group"); grp.setAttribute("aria-label", "Payment method");
+  const olab = el("label", "fld"); olab.htmlFor = "other-" + b.id;
+  olab.append(el("span", null, "Type the payment method"));
+  const other = el("input"); other.id = "other-" + b.id; other.type = "text"; other.maxLength = 40; other.placeholder = "e.g. Maya, bank transfer, card";
+  other.value = pay === "Other" ? (CHOICES.includes(start) ? "" : start) : "";
+  olab.appendChild(other); olab.hidden = pay !== "Other";
+  CHOICES.forEach(p => {
+    const bt = el("button", null, p); bt.type = "button"; bt.setAttribute("aria-pressed", p === pay);
+    bt.onclick = () => { pay = p; grp.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === bt)); olab.hidden = p !== "Other"; if (p === "Other") other.focus(); };
+    grp.appendChild(bt);
+  });
+  const err = el("p", "perr"); err.setAttribute("aria-live", "polite");
+  other.oninput = () => { err.textContent = ""; };
+  const lab = el("label", "fld"); lab.htmlFor = "note-" + b.id;
+  lab.append(el("span", null, "Note (optional)"));
+  const note = el("input"); note.id = "note-" + b.id; note.type = "text"; note.maxLength = 200; note.placeholder = "e.g. buyer name, GCash ref no."; note.value = isEdit ? (s.note || "") : "";
+  lab.appendChild(note);
+  const row = el("div", "prow");
+  const ok = el("button", "pbtn primary", isEdit ? "Save" : "Mark sold"); ok.type = "button";
+  const cancel = el("button", "pbtn", "Cancel"); cancel.type = "button";
+  ok.onclick = () => {
+    const finalPay = pay === "Other" ? other.value.trim() : pay;
+    if (!finalPay){ err.textContent = "Type the payment method, or pick N/A."; other.focus(); return; }
+    pushUndo(isEdit ? "Changed payment for Bag " + b.n : "Marked Bag " + b.n + " sold", [b.id]);
+    if (!isEdit){ s.status = "sold"; s.soldAt = Date.now(); }
+    s.pay = finalPay; s.note = note.value.trim(); lastPay = finalPay; LSset("jb_lastpay", finalPay); panel = null; commit(b.id);
+  };
+  cancel.onclick = () => { panel = null; render(); };
+  row.append(ok, cancel);
+  box.append(el("span", "plabel", "Payment"), grp, olab, lab, err, row);
+  return box;
+}
+function removePanel(b, s){
+  const box = el("div", "panel warn");
+  box.appendChild(el("p", "ptitle", "Remove Bag " + b.n + " from the sale?"));
+  const lab = el("label", "fld"); lab.htmlFor = "rnote-" + b.id;
+  lab.append(el("span", null, "Note (optional)"));
+  const note = el("input"); note.id = "rnote-" + b.id; note.type = "text"; note.maxLength = 200; note.placeholder = "e.g. damaged, kept, given away"; note.value = s.note || "";
+  lab.appendChild(note);
+  const ren = el("label", "chkrow"); ren.htmlFor = "ren-" + b.id;
+  const cb = el("input"); cb.type = "checkbox"; cb.id = "ren-" + b.id;
+  const txt = el("span"); txt.append(el("b", null, "Renumber the bags after it"), el("small", null, "Leave this off if the price tags are already printed. Bag numbers then stay the same."));
+  ren.append(cb, txt);
+  const row = el("div", "prow");
+  const ok = el("button", "pbtn danger", "Remove bag"); ok.type = "button";
+  const cancel = el("button", "pbtn", "Cancel"); cancel.type = "button";
+  ok.onclick = () => removeBag(b.id, note.value.trim(), cb.checked);
+  cancel.onclick = () => { panel = null; render(); };
+  row.append(ok, cancel);
+  box.append(lab, ren, row);
+  return box;
+}
+function unsellPanel(b, s){
+  const box = el("div", "panel");
+  box.appendChild(el("p", "ptitle", "Mark Bag " + b.n + " as not sold?"));
+  const row = el("div", "prow");
+  const yes = el("button", "pbtn danger", "Yes, unmark"); yes.type = "button";
+  const no = el("button", "pbtn", "Keep sold"); no.type = "button";
+  yes.onclick = () => { pushUndo("Marked Bag " + b.n + " not sold", [b.id]); s.status = "available"; s.soldAt = null; s.pay = ""; s.paid = ""; panel = null; commit(b.id); };
+  no.onclick = () => { panel = null; render(); };
+  row.append(yes, no); box.appendChild(row);
+  return box;
+}
+
+function render(){
+  const ul = $("list"); ul.textContent = "";
+  const q = $("q").value.trim().toLowerCase().replace(/^bag\s*#?\s*/, "");
+  const match = b => { if (!q) return true; if (/^\d+$/.test(q)) return b.n === Number(q); const s = state[b.id]; return (b.name + " " + (s.note || "") + " " + (s.pay || "")).toLowerCase().includes(q); };
+  const today = new Date().toDateString();
+  const isOld = b => { const s = state[b.id]; return s.status === "sold" && (!s.soldAt || new Date(s.soldAt).toDateString() !== today); };
+  const oldN = BAGS.filter(isOld).length;
+  $("oldCount").textContent = oldN ? "(" + oldN + ")" : "";
+  const hide = $("hideOld").checked && !q;
+  const rows = sortedBags().filter(b => { const st = state[b.id].status; return filter === "all" ? true : filter === "left" ? st === "available" : st === filter; }).filter(match).filter(b => !(hide && isOld(b)));
+  $("qClear").hidden = !q;
+  $("qMsg").textContent = q ? (rows.length ? rows.length + (rows.length === 1 ? " bag found" : " bags found") : "") : "";
+  if (!rows.length && q){ ul.appendChild(el("p", "empty", "No bag matches \u201c" + $("q").value.trim() + "\u201d.")); }
+  else if (!rows.length && hide && filter === "sold" && oldN){ ul.appendChild(el("p", "empty", "No bags sold today yet. Bags sold on earlier days are hidden.")); }
+  else if (!rows.length){ ul.appendChild(el("p", "empty", {sold: "No bags sold yet.", left: "All bags are sold!", removed: "No bags removed."}[filter] || "No bags.")); }
+  rows.forEach(b => {
+    const s = state[b.id];
+    const li = el("li", s.status === "sold" ? "is-sold" : s.status === "removed" ? "is-removed" : "");
+    const img = el("img"); img.src = b.img || PH; img.alt = b.name; img.loading = "lazy";
+    img.onclick = () => { $("zoomImg").src = b.img || PH; $("zoomImg").alt = b.name; $("zoom").hidden = false; };
+    const info = el("div", "info");
+    info.append(el("div", "num", (s.status === "removed" ? "Removed · " : "") + "Bag " + b.n), el("div", "name", b.name));
+    const tag = el("div", "tag" + (s.price !== b.tag && s.status !== "removed" ? " changed" : ""));
+    tag.textContent = s.price !== b.tag && s.status !== "removed" ? "Tag " + peso(b.tag) + " → " + peso(s.price) : "Tag " + peso(b.tag);
+    info.appendChild(tag);
+    if (s.status === "sold"){
+      const m = el("div", "meta"); m.append(el("span", "paychip" + (s.pay ? "" : " unset"), s.pay || "N/A"), document.createTextNode(" " + (s.soldAt ? fmtTime(s.soldAt) : "")));
+      if (s.paid) m.append(document.createTextNode(" "), el("span", "paidchip", "Paid " + paidDate(s)));
+      info.appendChild(m);
+    }
+    if (s.note && s.status !== "available") info.appendChild(el("div", "bnote", s.note));
+    const acts = el("div", "acts");
+    const link = (text, fn, cls) => { const a = el("button", "rm" + (cls ? " " + cls : ""), text); a.type = "button"; a.onclick = fn; acts.appendChild(a); return a; };
+    if (s.status === "available") link("Remove from sale", () => { panel = {id: b.id, type: "remove"}; render(); });
+    if (s.status === "sold") link("Change payment", () => { panel = {id: b.id, type: "edit"}; render(); });
+    if (s.status === "removed") link("Put back", () => putBack(b.id), "strong");
+    if (b.extra){
+      const del = link("Delete", () => {
+        if (!del.classList.contains("armed")){ del.classList.add("armed"); del.textContent = "Tap again to delete"; setTimeout(() => { del.classList.remove("armed"); del.textContent = "Delete"; }, 3000); return; }
+        deleteExtra(b.id);
+      });
+    }
+    info.appendChild(acts);
+    const ctrl = el("div", "ctrl");
+    if (s.status !== "removed"){
+      const pr = el("label", "price"); pr.append(el("span", null, "₱"));
+      const inp = el("input"); inp.type = "number"; inp.inputMode = "numeric"; inp.min = "0"; inp.id = "p-" + b.id; inp.value = s.price; inp.setAttribute("aria-label", "Price for bag " + b.n);
+      inp.onchange = () => { const v = Math.max(0, Number(inp.value) || 0); if (v === s.price) return; pushUndo("Changed Bag " + b.n + " price to " + peso(v), [b.id]); s.price = v; commit(b.id); };
+      pr.appendChild(inp);
+      const cb = el("input", "chk"); cb.type = "checkbox"; cb.id = "s-" + b.id; cb.checked = s.status === "sold"; cb.setAttribute("aria-label", "Bag " + b.n + " sold");
+      cb.onchange = () => { cb.checked = s.status === "sold"; panel = {id: b.id, type: s.status === "sold" ? "unsell" : "sell"}; render(); };
+      ctrl.append(pr, cb);
+    }
+    li.append(img, info, ctrl);
+    if (panel && panel.id === b.id){
+      const p = panel.type === "sell" ? sellPanel(b, s, false) : panel.type === "edit" ? sellPanel(b, s, true) : panel.type === "remove" ? removePanel(b, s) : unsellPanel(b, s);
+      p.classList.add("full"); li.appendChild(p);
+    }
+    ul.appendChild(li);
+  });
+  totals(); renderLog(); if (typeof view !== "undefined" && view === "vStats") renderStats();
+  $("addNum").placeholder = String(nextNum());
+}
+
+// ---- Numbering ----
+const nextNum = () => Math.max(0, ...active().map(b => b.n)) + 1;
+// ---- Undo ----
+const undoStack = [];
+let undoTimer;
+function pushUndo(label, ids){
+  undoStack.push({label, items: ids.map(id => { const b = bagOf(id); return b ? {id, existed: true, bag: {...b}, st: {...state[id]}} : {id, existed: false}; })});
+  if (undoStack.length > 30) undoStack.shift();
+  showUndo(label);
+}
+function showUndo(label){
+  $("undoText").textContent = label; $("undoBtn").hidden = false; $("undoBar").hidden = false; $("undoLast").hidden = !undoStack.length;
+  clearTimeout(undoTimer); undoTimer = setTimeout(() => { $("undoBar").hidden = true; }, 9000);
+}
+function undo(){
+  const u = undoStack.pop(); if (!u){ $("undoBar").hidden = true; return; }
+  const saveIds = [];
+  u.items.forEach(it => {
+    if (!it.existed){
+      const i = BAGS.findIndex(b => b.id === it.id);
+      if (i >= 0){ BAGS.splice(i, 1); delete state[it.id]; if (online) enqueue({action: "delete", id: it.id}); }
+      return;
+    }
+    let b = bagOf(it.id);
+    if (!b){ b = {...it.bag}; BAGS.push(b); } else Object.assign(b, it.bag);
+    state[it.id] = {...it.st};
+    saveIds.push(it.id);
+  });
+  panel = null; saveLocal(); render();
+  if (online && saveIds.length) enqueue({action: "batch", ids: saveIds});
+  clearTimeout(undoTimer);
+  $("undoText").textContent = "Undid: " + u.label; $("undoBar").hidden = false; $("undoLast").hidden = !undoStack.length;
+  $("undoBtn").hidden = !undoStack.length;
+  undoTimer = setTimeout(() => { $("undoBar").hidden = true; $("undoBtn").hidden = false; }, 5000);
+}
+function removeBag(id, note, renumber){
+  const b = bagOf(id), s = state[id];
+  pushUndo("Removed Bag " + b.n, [id].concat(renumber ? BAGS.filter(x => x.id !== id && state[x.id].status !== "removed" && x.n > b.n).map(x => x.id) : []));
+  s.status = "removed"; s.note = note; s.soldAt = null; s.pay = ""; s.paid = "";
+  const changed = [id];
+  if (renumber){
+    BAGS.forEach(x => { if (x.id !== id && state[x.id].status !== "removed" && x.n > b.n){ x.n -= 1; changed.push(x.id); } });
+  }
+  panel = null; saveLocal(); render();
+  $("listMsg").textContent = "Removed Bag " + b.n + (renumber ? ". Bags after it moved up one number." : ". Bag numbers stay the same.");
+  if (online) enqueue({action: "batch", ids: changed});
+}
+function putBack(id){
+  const b = bagOf(id), s = state[id];
+  pushUndo("Put back Bag " + b.n, [id]);
+  const clash = active().some(x => x.n === b.n);
+  if (clash) b.n = nextNum();
+  s.status = "available"; s.price = s.price || b.tag;
+  saveLocal(); render();
+  $("listMsg").textContent = clash ? "Put back as Bag " + b.n + " because its old number is taken." : "Put back Bag " + b.n + ".";
+  if (online) enqueue({action: "batch", ids: [id]});
+}
+
+// ---- Saving to the Google Sheet ----
+function showPin(msg){ $("pinForm").hidden = false; $("pinMsg").textContent = msg; }
+function enqueue(op){
+  if (op.action === "batch"){
+    const ids = new Set(op.ids);
+    queue = queue.filter(q => !(q.action === "batch" && q.ids.every(i => ids.has(i))));
+  } else {
+    queue = queue.filter(q => !(q.action === op.action && q.id === op.id));
+  }
+  op.at = Date.now(); queue.push(op); saveLocal(); flush(); showPending();
+}
+let flushing = false;
+async function flush(){
+  if (!online || flushing || !queue.length) return;
+  if (holdQueue){ showPending(); setStatus(queue.length + (queue.length === 1 ? " change" : " changes") + " from an earlier day waiting for you. See the top of the page."); return; }
+  if (!pin){ showPin("Type the helper PIN so your changes save for everyone."); setStatus(queue.length + " change(s) waiting for the PIN."); return; }
+  flushing = true;
+  try {
+    while (queue.length){
+      const op = queue[0];
+      let body;
+      if (op.action === "delete") body = {pin, action: "delete", row: {id: op.id}};
+      else { const rows = op.ids.filter(i => bagOf(i)).map(rowOf); if (!rows.length){ queue.shift(); continue; } body = {pin, action: "batch", rows, row: rows[0]}; }
+      const r = await fetch(API_URL, {method: "POST", body: JSON.stringify(body)});
+      const j = await r.json();
+      if (!j.ok){
+        if (j.error === "pin"){ pin = ""; LSset("jb_pin", ""); showPin("That PIN is wrong. Type the helper PIN again."); setStatus(queue.length + " change(s) waiting for the PIN."); }
+        else setStatus(j.error === "locked" ? "Too many wrong PINs were tried. Wait 10 minutes, then try again." : "The sheet did not save a change. Try again later.");
+        break;
+      }
+      queue.shift(); saveLocal();
+    }
+    if (!queue.length) setStatus("Saved to the sheet · " + timeNow());
+    showPending();
+  } catch(e){ setStatus("No connection. " + queue.length + " change(s) will save when you're back online."); }
+  finally { flushing = false; }
+}
+const pendingIds = () => { const s = new Set(); queue.forEach(q => q.action === "delete" ? s.add(q.id) : q.ids.forEach(i => s.add(i))); return s; };
+function busy(){ const a = document.activeElement; return panel || (a && a.tagName === "INPUT" && (a.type === "number" || a.type === "text")); }
+async function pull(){
+  if (!online) return;
+  try {
+    if (!pin){ showPin("Type the helper PIN to load the bags and save changes."); setStatus("Waiting for the helper PIN."); return; }
+    const r = await fetch(API_URL, {method: "POST", body: JSON.stringify({pin, action: "list"})}); const j = await r.json();
+    if (!j.ok){
+      if (j.error === "pin"){ pin = ""; LSset("jb_pin", ""); showPin("That PIN is wrong. Type the helper PIN again."); setStatus("Waiting for the helper PIN."); if (typeof showPinState === "function") showPinState(); }
+      else if (j.error === "locked") setStatus("Too many wrong PINs were tried. Wait 10 minutes, then try again.");
+      return;
+    }
+    const pending = pendingIds(), seen = new Set();
+    srvRows = {}; (j.rows || []).forEach(v => { srvRows[v.id] = {n: v.n, name: v.name, tag: v.tag, price: v.price, status: normStatus(v), pay: v.pay || "", note: v.note || "", paid: v.paid || ""}; });
+    LSset("jb_srv", JSON.stringify(srvRows));
+    (j.rows || []).forEach(v => {
+      seen.add(v.id); if (pending.has(v.id)) return;
+      if (v.extra && !state[v.id]) addExtra(v.id, v);
+      const b = bagOf(v.id), s = state[v.id]; if (!b || !s) return;
+      if (v.n) b.n = Number(v.n);
+      if (!b.img && typeof v.img === "string" && v.img.startsWith("data:image/")) b.img = v.img;
+      if (typeof v.price === "number" && !isNaN(v.price)) s.price = v.price;
+      const st = normStatus(v); s.soldAt = typeof v.soldAt === "number" ? v.soldAt : (st === "sold" && s.status === "sold" ? s.soldAt : null); s.status = st; if (st !== "sold") s.paid = ""; else if ("paid" in v) s.paid = v.paid || "";
+      if (j.v >= 2){ s.pay = v.pay || ""; s.note = v.note || ""; }
+      if (v.extra){ b.name = String(v.name || b.name); b.tag = Number(v.tag) || b.tag; }
+    });
+    for (let i = BAGS.length - 1; i >= 0; i--){ const b = BAGS[i]; if (b.extra && !seen.has(b.id) && !pending.has(b.id)){ BAGS.splice(i, 1); delete state[b.id]; } }
+    saveLocal();
+    if (busy()) totals(); else render();
+    if (!queue.length) setStatus("Up to date · " + timeNow());
+    showPending();
+  } catch(e){ setStatus("No connection. Showing this phone's last copy."); }
+}
+function commit(id){ saveLocal(); render(); if (online) enqueue({action: "batch", ids: [id]}); }
+function deleteExtra(id){
+  const i = BAGS.findIndex(b => b.id === id); if (i < 0) return;
+  const n = BAGS[i].n; pushUndo("Deleted Bag " + n, [id]); BAGS.splice(i, 1); delete state[id]; saveLocal(); render();
+  $("listMsg").textContent = "Deleted Bag " + n + ".";
+  if (online) enqueue({action: "delete", id});
+}
+
+// ---- Invoice PDF ----
+function loadScript(src){ return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+const pdfText = t => String(t).replace(/₱/g, "PHP ").replace(/[^\x20-\x7E -ÿ]/g, "");
+const money = n => "PHP " + Number(n).toLocaleString("en-PH", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+async function exportPdf(){
+  const btn = $("pdfBtn"), msg = $("pdfMsg"), range = $("pdfRange").value;
+  const list = soldBags(range);
+  if (!list.length){ msg.textContent = "No sales to put on the invoice yet."; return; }
+  btn.disabled = true; msg.textContent = "Making the PDF…";
+  try {
+    if (!window.jspdf){
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js");
+    }
+    const doc = new window.jspdf.jsPDF({unit: "mm", format: "a4"});
+    const now = new Date(), W = 210, M = 15, ink = [179, 35, 59];
+    const pad = n => String(n).padStart(2, "0");
+    const dv = $("pdfDate").value || dayKey(Date.now());
+    const invNo = "INV-" + dv.replace(/-/g, "") + "-" + pad(now.getHours()) + pad(now.getMinutes());
+    const dstr = dayLabel(dv);
+    doc.setFillColor(255, 201, 204); doc.rect(0, 0, W, 34, "F");
+    doc.setTextColor(...ink); doc.setFont("helvetica", "bold"); doc.setFontSize(24); doc.text("JEN BAGS", M, 17);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.text("Gawa ng Ina Mo!  ·  Home made and upcycled", M, 24);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text("SALES INVOICE", W - M, 15, {align: "right"});
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(30, 20, 25);
+    doc.text("Invoice no. " + invNo, W - M, 21, {align: "right"});
+    doc.text("Date: " + dstr, W - M, 26, {align: "right"});
+    const paidList = list.filter(b => state[b.id].paid), allPaid = paidList.length === list.length;
+    if (paidList.length){
+      const pd = paidList.map(b => state[b.id].paid).sort().pop();
+      doc.setFont("helvetica", "bold"); doc.setTextColor(...ink);
+      doc.text(allPaid ? "PAID " + dayLabel(pd) : "PARTLY PAID", W - M, 31, {align: "right"});
+      doc.setFont("helvetica", "normal");
+    }
+    doc.setFontSize(11); doc.setTextColor(20, 20, 20);
+    doc.text(range.startsWith("d:") ? "Sales on " + dayLabel(range.slice(2)) : range === "unpaid" ? "Unpaid sales" : "All sales", M, 43);
+    const photo = src => (src && /^data:image\/(jpeg|png)/.test(src)) ? src : null;
+    const drawPhoto = (imgs, col) => d => { if (d.section === "body" && d.column.index === col){ const src = imgs[d.row.index]; if (src){ const sz = Math.min(d.cell.width, d.cell.height) - 3; try { doc.addImage(src, src.indexOf("image/png") > 0 ? "PNG" : "JPEG", d.cell.x + (d.cell.width - sz) / 2, d.cell.y + 1.5, sz, sz); } catch(e){} } } };
+    const imgs = list.map(b => photo(b.img));
+    const body = list.map((b, i) => { const s = state[b.id]; return [String(i + 1), "", "Bag " + b.n, pdfText(b.name) + (s.note ? "\n" + pdfText(s.note) : ""), s.pay || "N/A", s.soldAt ? new Date(s.soldAt).toLocaleString("en-PH", {month: "short", day: "numeric", hour: "numeric", minute: "2-digit"}) : "-", money(s.price)]; });
+    doc.autoTable({startY: 47, head: [["#", "Photo", "Bag", "Description", "Payment", "Sold at", "Amount"]], body, didDrawCell: drawPhoto(imgs, 1),
+      margin: {left: M, right: M}, styles: {fontSize: 10.5, cellPadding: 2.2, valign: "middle", textColor: 20}, bodyStyles: {minCellHeight: 17},
+      headStyles: {fillColor: ink, textColor: 255}, alternateRowStyles: {fillColor: [255, 244, 245]},
+      columnStyles: {0: {cellWidth: 11, halign: "center", overflow: "visible"}, 1: {cellWidth: 18}, 2: {cellWidth: 19, overflow: "visible"}, 4: {cellWidth: 20}, 5: {cellWidth: 35}, 6: {cellWidth: 29, halign: "right", overflow: "visible"}}});
+    const total = list.reduce((a, b) => a + state[b.id].price, 0), cut = Math.round(total * 0.3), t = byPay(list);
+    const sum = [["Bags sold", String(list.length)]];
+    Object.keys(t).forEach(k => { if (t[k] || PAYS.includes(k)) sum.push([k === "Not set" ? "Payment not identified" : "Paid by " + k, money(t[k])]); });
+    if (paidList.length){
+      const paidAmt = paidList.reduce((a, b) => a + state[b.id].price, 0);
+      sum.push(["Already paid (" + paidList.length + ")", money(paidAmt)], ["Still unpaid (" + (list.length - paidList.length) + ")", money(total - paidAmt)]);
+    }
+    sum.push(["Total sales", money(total)], ["30% cut", money(cut)], ["Jen Bags share (70%)", money(total - cut)]);
+    doc.autoTable({startY: doc.lastAutoTable.finalY + 6, body: sum, margin: {left: W - M - 95, right: M}, theme: "plain",
+      styles: {fontSize: 11, cellPadding: 1.8, textColor: 20}, columnStyles: {1: {halign: "right", fontStyle: "bold"}},
+      didParseCell: d => { if (d.row.index >= sum.length - 3){ d.cell.styles.fontStyle = "bold"; } if (d.row.index === sum.length - 3) d.cell.styles.textColor = ink; }});
+    const removed = BAGS.filter(b => state[b.id].status === "removed").sort((a, b) => a.n - b.n);
+    if (removed.length){
+      let y = doc.lastAutoTable.finalY + 10;
+      if (y > 255){ doc.addPage(); y = 20; }
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(40, 40, 40); doc.text("Removed from sale", M, y);
+      const rimgs = removed.map(b => photo(b.img));
+      doc.autoTable({startY: y + 3, head: [["Photo", "Bag", "Description", "Note"]], body: removed.map(b => ["", "Bag " + b.n, pdfText(b.name), pdfText(state[b.id].note || "-")]), didDrawCell: drawPhoto(rimgs, 0), bodyStyles: {minCellHeight: 17, valign: "middle"},
+        margin: {left: M, right: M}, styles: {fontSize: 10.5, cellPadding: 2.2, textColor: 20}, headStyles: {fillColor: [120, 110, 115], textColor: 255}, columnStyles: {0: {cellWidth: 18}, 1: {cellWidth: 19, overflow: "visible"}}});
+    }
+    const pages = doc.getNumberOfPages();
+    for (let p = 1; p <= pages; p++){ doc.setPage(p); doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(90); doc.text("Jen Bags sale tracker  ·  " + invNo + "  ·  Page " + p + " of " + pages, W / 2, 290, {align: "center"}); }
+    const fname = "jen-bags-invoice-" + (range.startsWith("d:") ? range.slice(2) : now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate())) + ".pdf";
+    const blob = doc.output("blob");
+    const url = URL.createObjectURL(new File([blob], fname, {type: "application/pdf"}));
+    const a = document.createElement("a"); a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove();
+    msg.textContent = "";
+    msg.append(document.createTextNode("Made " + invNo + ". If it didn't download, "));
+    const open = el("a", "pdflink", "tap here to open it"); open.href = url; open.target = "_blank"; open.rel = "noopener";
+    msg.append(open, document.createTextNode(" and save or share it from there."));
+  } catch(e){ msg.textContent = "Couldn't make the PDF. Check your internet connection and try again."; }
+  finally { btn.disabled = false; }
+}
+
+
+// ---- Mark invoices paid ----
+function markPaid(on){
+  const msg = $("pdfMsg"), range = $("pdfRange").value, dv = $("pdfDate").value || dayKey(Date.now());
+  const list = soldBags(range).filter(b => on ? !state[b.id].paid : !!state[b.id].paid);
+  if (!list.length){ msg.textContent = on ? "Nothing to mark. Those sales are already paid." : "None of those sales are marked paid."; return; }
+  const n = list.length + (list.length === 1 ? " sale" : " sales");
+  pushUndo(on ? "Marked " + n + " as paid" : "Marked " + n + " as unpaid", list.map(b => b.id));
+  list.forEach(b => { state[b.id].paid = on ? dv : ""; });
+  saveLocal(); render();
+  if (online) enqueue({action: "batch", ids: list.map(b => b.id)});
+  msg.textContent = on ? "Marked " + n + " as paid on " + dayLabel(dv) + "." : "Marked " + n + " as unpaid.";
+}
+// ---- Views & statistics ----
+var view = "vBags";
+function setView(v){
+  view = v; document.body.dataset.view = v;
+  ["vBags", "vStats", "vHelp"].forEach(id => { $(id).hidden = id !== v; });
+  document.querySelectorAll(".views button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === v));
+  if (v === "vStats") renderStats();
+  try { localStorage.setItem("jb_view", v); } catch(e){}
+}
+document.querySelectorAll(".views button").forEach(b => b.onclick = () => setView(b.dataset.v));
+function statSold(){
+  const from = $("stFrom").value, to = $("stTo").value, pf = $("stPaid").value;
+  return BAGS.filter(b => {
+    const s = state[b.id]; if (s.status !== "sold") return false;
+    if (pf === "paid" && !s.paid) return false;
+    if (pf === "unpaid" && s.paid) return false;
+    if (from || to){ if (!s.soldAt) return false; const k = dayKey(s.soldAt); if ((from && k < from) || (to && k > to)) return false; }
+    return true;
+  });
+}
+function threadBar(frac, cls){ const t = el("div", "thread" + (cls ? " " + cls : "")); const f = el("span", "tfill"); f.style.width = Math.max(0, Math.min(1, frac)) * 100 + "%"; t.appendChild(f); return t; }
+function rcptRows(host, rows){ host.textContent = ""; rows.forEach(r => { const d = el("div", "rrow" + (r[2] ? " " + r[2] : "")); d.append(el("span", null, r[0]), el("b", null, r[1])); host.appendChild(d); }); }
+function hbars(host, rows, fmt){
+  host.textContent = "";
+  if (!rows.length){ host.appendChild(el("p", "chempty", "No sales yet.")); return; }
+  const max = Math.max(...rows.map(r => r.v), 1), box = el("div", "hbars");
+  rows.forEach(r => {
+    const row = el("div", "hb"); row.title = r.label + ": " + fmt(r);
+    const top = el("div", "hb-top"); top.append(el("span", null, r.label), el("b", null, fmt(r)));
+    row.append(top, threadBar(r.frac != null ? r.frac : r.v / max)); box.appendChild(row);
+  });
+  host.appendChild(box);
+}
+function renderStats(){
+  const sold = statSold(), act = active();
+  const sum = l => l.reduce((a, b) => a + state[b.id].price, 0);
+  const total = sum(sold), cut = Math.round(total * 0.3);
+  const allSoldN = BAGS.filter(b => state[b.id].status === "sold").length;
+  const left = act.length - allSoldN;
+  const from = $("stFrom").value, to = $("stTo").value, pf = $("stPaid").value;
+  const paidL = sold.filter(b => state[b.id].paid), dueL = sold.filter(b => !state[b.id].paid);
+  $("totCap").textContent = (from && to ? dayLabel(from) + " to " + dayLabel(to) : from ? "From " + dayLabel(from) : to ? "Up to " + dayLabel(to) : "All dates") + ", " + (pf === "paid" ? "paid sales only" : pf === "unpaid" ? "unpaid sales only" : "all sales");
+  $("stCollected").textContent = peso(total);
+  $("stKeep").textContent = peso(total - cut); $("stCut").textContent = peso(cut);
+  $("stCount").textContent = sold.length + (sold.length === 1 ? " bag sold" : " bags sold");
+  $("stSoldN").textContent = allSoldN; $("stAllN").textContent = act.length;
+  const th = $("stThread"); th.textContent = ""; th.appendChild(threadBar(act.length ? allSoldN / act.length : 0, "big"));
+  $("stLeft").textContent = left === 0 ? "Every bag is sold." : left + (left === 1 ? " bag left to sell" : " bags left to sell") + (act.length ? ", " + Math.round(allSoldN / act.length * 100) + "% sold" : "");
+  rcptRows($("totFacts"), [
+    ["Already paid", paidL.length + (paidL.length === 1 ? " bag, " : " bags, ") + peso(sum(paidL))],
+    ["Still unpaid", dueL.length + (dueL.length === 1 ? " bag, " : " bags, ") + peso(sum(dueL)), dueL.length ? "due" : ""]
+  ]);
+  const days = {}, hours = {};
+  sold.forEach(b => { const s = state[b.id]; if (!s.soldAt) return; const k = dayKey(s.soldAt); (days[k] = days[k] || {v: 0, n: 0}); days[k].v += s.price; days[k].n++; const h = new Date(s.soldAt).getHours(); hours[h] = (hours[h] || 0) + 1; });
+  const dayKeys = Object.keys(days).sort();
+  const bestDay = dayKeys.slice().sort((a, b) => days[b].v - days[a].v)[0];
+  const hourKeys = Object.keys(hours).map(Number);
+  const bestHour = hourKeys.slice().sort((a, b) => hours[b] - hours[a])[0];
+  const hLabel = h => { const ap = h < 12 ? "AM" : "PM", x = h % 12 || 12; return x + " " + ap; };
+  const shortDay = k => dayLabel(k).replace(/, \d{4}$/, "");
+  const top = sold.slice().sort((a, b) => state[b.id].price - state[a.id].price)[0];
+  rcptRows($("facts"), [
+    ["Average sale", sold.length ? peso(total / sold.length) : "None yet"],
+    ["Highest sale", top ? peso(state[top.id].price) + ", Bag " + top.n : "None yet"],
+    ["Best day", bestDay ? shortDay(bestDay) + ", " + peso(days[bestDay].v) : "None yet"],
+    ["Busiest hour", bestHour != null ? hLabel(bestHour) + " to " + hLabel((bestHour + 1) % 24) : "None yet"]
+  ]);
+  hbars($("chDay"), dayKeys.map(k => ({label: shortDay(k), v: days[k].v, n: days[k].n})), r => peso(r.v) + ", " + r.n + (r.n === 1 ? " bag" : " bags"));
+  const hc = $("chHour"); hc.textContent = "";
+  if (!hourKeys.length){ hc.appendChild(el("p", "chempty", "No sales yet.")); }
+  else {
+    const lo = Math.min(...hourKeys), hi = Math.max(...hourKeys), mx = Math.max(...Object.values(hours));
+    const cols = el("div", "cols"), axis = el("div", "col-axis");
+    for (let h = lo; h <= hi; h++){
+      const n = hours[h] || 0, c = el("div", "col" + (h === bestHour ? " peak" : "")); c.title = hLabel(h) + ": " + n + (n === 1 ? " bag" : " bags");
+      const bar = el("div", "col-bar"); bar.style.height = (n / mx * 100 * 0.85) + "%";
+      if (n) c.appendChild(el("span", "col-v", String(n)));
+      c.appendChild(bar); cols.appendChild(c);
+      const step = hi - lo >= 12 ? 4 : hi - lo >= 6 ? 2 : 1; axis.appendChild(el("span", null, (h - lo) % step === 0 ? hLabel(h).replace(" ", "") : ""));
+    }
+    hc.append(cols, axis);
+  }
+  // payment methods: one split bar + legend
+  const t = byPay(sold), pc = $("chPay"); pc.textContent = "";
+  const keys = Object.keys(t).filter(k => t[k] > 0).sort((a, b) => t[b] - t[a]);
+  if (!keys.length) pc.appendChild(el("p", "chempty", "No sales yet."));
+  else {
+    const tot = keys.reduce((a, k) => a + t[k], 0), bar = el("div", "split"), leg = el("div", "legend");
+    keys.forEach((k, i) => {
+      const seg = el("span", "seg" + (i % 4)); seg.style.width = (t[k] / tot * 100) + "%"; seg.title = k + ": " + peso(t[k]); bar.appendChild(seg);
+      const row = el("div", "lrow"); const dot = el("i", "dot seg" + (i % 4));
+      row.append(dot, el("span", null, k === "Not set" ? "Not identified" : k), el("b", null, peso(t[k]) + ", " + Math.round(t[k] / tot * 100) + "%")); leg.appendChild(row);
+    });
+    pc.append(bar, leg);
+  }
+  const groups = [["₱100 and below", 0, 100], ["₱101 to ₱150", 101, 150], ["₱151 to ₱250", 151, 250], ["Above ₱250", 251, 1e9]];
+  hbars($("chPrice"), groups.map(g => { const inG = act.filter(b => b.tag >= g[1] && b.tag <= g[2]); const s2 = inG.filter(b => sold.includes(b)).length; return {label: g[0], v: s2, frac: inG.length ? s2 / inG.length : 0, s: s2, all: inG.length}; }).filter(r => r.all), r => r.s + " of " + r.all + " sold");
+}
+// ---- Page controls ----
+$("logWrap").addEventListener("toggle", () => { $("logSum").textContent = ($("logWrap").open ? "Hide sales" : $("logSum").textContent.replace("Hide sales", "Show sales")); if (!$("logWrap").open) renderLog(); });
+try { $("hideOld").checked = LS("jb_hideold") !== "0"; } catch(e){ $("hideOld").checked = true; }
+$("hideOld").onchange = () => { LSset("jb_hideold", $("hideOld").checked ? "1" : "0"); render(); };
+let qTimer; $("q").addEventListener("input", () => { clearTimeout(qTimer); qTimer = setTimeout(render, 120); });
+$("searchForm").addEventListener("submit", e => { e.preventDefault(); $("q").blur(); render(); });
+$("qClear").onclick = () => { $("q").value = ""; render(); $("q").focus(); };
+document.querySelectorAll(".tabs button").forEach(btn => btn.onclick = () => {
+  filter = btn.dataset.f; document.querySelectorAll(".tabs button").forEach(x => x.setAttribute("aria-pressed", x === btn)); render();
+});
+$("zoom").onclick = () => { $("zoom").hidden = true; };
+$("pdfBtn").onclick = exportPdf;
+$("paidBtn").onclick = () => markPaid(true); $("unpaidBtn").onclick = () => markPaid(false);
+["stFrom", "stTo", "stPaid"].forEach(id => $(id).addEventListener("change", renderStats));
+$("stClear").onclick = () => { $("stFrom").value = ""; $("stTo").value = ""; $("stPaid").value = "all"; renderStats(); };
+$("undoBtn").onclick = undo; $("undoLast").onclick = undo;
+$("undoClose").onclick = () => { $("undoBar").hidden = true; };
+$("pdfDate").value = dayKey(Date.now());
+$("pdfRange").addEventListener("change", () => { const v = $("pdfRange").value; $("pdfDate").value = v.startsWith("d:") ? v.slice(2) : dayKey(Date.now()); });
+$("pinForm").addEventListener("submit", e => {
+  e.preventDefault(); const v = $("pinIn").value.trim(); if (!v) return;
+  pin = v; LSset("jb_pin", v); $("pinIn").value = ""; $("pinForm").hidden = true; pull().then(flush);
+});
+function shrinkPhoto(file){
+  return new Promise(res => {
+    if (!file) return res("");
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => { const k = Math.min(1, 220 / Math.max(im.width, im.height)); const c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg", 0.6)); };
+    im.onerror = () => { URL.revokeObjectURL(url); res(""); };
+    im.src = url;
+  });
+}
+$("addForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("addName").value.trim(), price = Number($("addPrice").value);
+  const numRaw = $("addNum").value.trim(), n = numRaw === "" ? nextNum() : Math.floor(Number(numRaw));
+  if (!name){ $("addMsg").textContent = "Type a short description of the bag."; $("addName").focus(); return; }
+  if ($("addPrice").value === "" || !(price >= 0)){ $("addMsg").textContent = "Type the bag's price."; $("addPrice").focus(); return; }
+  if (!(n >= 1)){ $("addMsg").textContent = "Bag number must be 1 or more."; $("addNum").focus(); return; }
+  if (active().some(b => b.n === n)){ $("addMsg").textContent = "Bag " + n + " is already used. Pick another number."; $("addNum").focus(); return; }
+  $("addBtn").disabled = true;
+  const img = await shrinkPhoto($("addPhoto").files[0]);
+  const id = "x" + Date.now().toString(36);
+  pushUndo("Added Bag " + n, [id]);
+  addExtra(id, {n, name, tag: price, img, price, status: "available"});
+  $("addForm").reset(); $("addBtn").disabled = false;
+  $("addMsg").textContent = "Added Bag " + n + ".";
+  commit(id);
+});
+
+
+// ---- Scan to sell: a cart of one or more bags for one buyer ----
+// Opening ?sell=<bag id> (phone camera) starts the cart with that bag.
+let scanDone = false, cart = null;
+let camStream = null, camTimer = null, jsqrLoading = null;
+function scanParam(){ try { return new URLSearchParams(location.search).get("sell") || ""; } catch(e){ return ""; } }
+function loadJsQR(){
+  if (window.jsQR) return Promise.resolve();
+  if (jsqrLoading) return jsqrLoading;
+  jsqrLoading = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"; sc.onload = res; sc.onerror = () => { jsqrLoading = null; rej(); }; document.head.appendChild(sc); });
+  return jsqrLoading;
+}
+function idFromQR(text){
+  try { const u = new URL(text); const id = u.searchParams.get("sell"); if (id) return id; } catch(e){}
+  return bagOf(String(text).trim()) ? String(text).trim() : "";
+}
+function stopCamera(){ clearInterval(camTimer); camTimer = null; if (camStream){ camStream.getTracks().forEach(t => t.stop()); camStream = null; } if (cart){ cart.camOn = false; if (cart.vid) cart.vid.hidden = true; if (cart.flash) cart.flash.hidden = true; } }
+function closeCart(){ stopCamera(); const w = $("scanWrap"); if (w) w.remove(); cart = null; try { if (location.search) history.replaceState(null, "", location.pathname); } catch(e){} render(); }
+function cartMsg(t, warn){ if (!cart) return; cart.msg.textContent = t; cart.msg.className = "cammsg" + (warn ? " warn" : ""); }
+function addToCart(id){
+  if (!cart) return;
+  const b = bagOf(id), s = b && state[id];
+  if (!b){ cartMsg("That bag is not in the tracker.", true); return; }
+  if (cart.items.some(it => it.id === id)){ cartMsg("Bag " + b.n + " is already in the list.", true); return; }
+  if (s.status === "sold"){ cartMsg("Bag " + b.n + " is already sold" + (s.pay ? " (" + s.pay + ", " + peso(s.price) + ")" : "") + ".", true); return; }
+  if (s.status === "removed"){ cartMsg("Bag " + b.n + " was removed from the sale.", true); return; }
+  cart.items.push({id, price: s.price});
+  if (navigator.vibrate) navigator.vibrate(60);
+  cartMsg("Added Bag " + b.n + ". Scan another, or pick the payment below.");
+  drawCart();
+}
+function drawCart(){
+  if (!cart) return;
+  const ul = cart.list; ul.textContent = "";
+  let total = 0;
+  cart.items.forEach((it, i) => {
+    const b = bagOf(it.id); if (!b) return;
+    total += Number(it.price) || 0;
+    const li = el("li", "citem");
+    const im = el("img"); im.src = b.img || PH; im.alt = b.name;
+    const t = el("div", "cinfo"); t.append(el("div", "sn", "Bag " + b.n), el("div", "cname", b.name));
+    const pr = el("label", "cprice"); pr.append(document.createTextNode("₱"));
+    const inp = el("input"); inp.type = "number"; inp.inputMode = "numeric"; inp.min = "0"; inp.value = it.price; inp.setAttribute("aria-label", "Price for Bag " + b.n);
+    inp.oninput = () => { it.price = inp.value === "" ? "" : Number(inp.value); cart.totalEl.textContent = peso(cart.items.reduce((a, x) => a + (Number(x.price) || 0), 0)); };
+    pr.appendChild(inp);
+    const x = el("button", "cx", "×"); x.type = "button"; x.setAttribute("aria-label", "Take Bag " + b.n + " off the list");
+    x.onclick = () => { cart.items.splice(i, 1); drawCart(); };
+    li.append(im, t, pr, x); ul.appendChild(li);
+  });
+  cart.totalEl.textContent = peso(total);
+  cart.countEl.textContent = cart.items.length ? cart.items.length + (cart.items.length === 1 ? " bag" : " bags") : "No bags yet";
+  cart.ok.textContent = cart.items.length > 1 ? "Mark " + cart.items.length + " bags sold" : "Mark sold";
+  cart.payArea.hidden = !cart.items.length;
+}
+async function startCam(){
+  if (!cart || cart.camOn) return;
+  cart.camOn = true; cart.vid.hidden = false; cart.scanMore.hidden = true;
+  cartMsg("Starting the camera…");
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ cartMsg("This browser can't use the camera. Open the site in Chrome or Safari.", true); return; }
+  try { camStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: "environment"}}, audio: false}); }
+  catch(e){ cart.camOn = false; cart.vid.hidden = true; cart.scanMore.hidden = false; cartMsg("Camera blocked. Allow camera access for this site, then try again.", true); return; }
+  if (!cart){ stopCamera(); return; }
+  cart.vid.srcObject = camStream; try { await cart.vid.play(); } catch(e){}
+  try { const tr = camStream.getVideoTracks()[0]; const cap = tr.getCapabilities ? tr.getCapabilities() : {}; cart.flash.hidden = !cap.torch; cart.flash.setAttribute("aria-pressed", "false"); cart.flash.textContent = "Turn on flash"; } catch(e){ cart.flash.hidden = true; }
+  cartMsg(cart.items.length ? "Scan the next bag, or pick the payment below." : "Point the camera at a bag's QR sticker.");
+  let detector = null;
+  if ("BarcodeDetector" in window){ try { detector = new BarcodeDetector({formats: ["qr_code"]}); } catch(e){ detector = null; } }
+  if (!detector){ try { await loadJsQR(); } catch(e){ cartMsg("Couldn't load the scanner. Check your internet connection.", true); return; } }
+  const cv = document.createElement("canvas"), cx = cv.getContext("2d", {willReadFrequently: true});
+  let busyScan = false, lastText = "", lastAt = 0;
+  camTimer = setInterval(async () => {
+    if (!cart || busyScan || !cart.vid.videoWidth) return; busyScan = true;
+    try {
+      const vid = cart.vid; let text = "";
+      if (detector){ const r = await detector.detect(vid); if (r && r[0]) text = r[0].rawValue; }
+      else { const k = Math.min(1, 640 / vid.videoWidth); cv.width = Math.round(vid.videoWidth * k); cv.height = Math.round(vid.videoHeight * k); cx.drawImage(vid, 0, 0, cv.width, cv.height); const d = cx.getImageData(0, 0, cv.width, cv.height); const r = window.jsQR(d.data, cv.width, cv.height, {inversionAttempts: "dontInvert"}); if (r) text = r.data; }
+      if (text && !(text === lastText && Date.now() - lastAt < 2500)){
+        lastText = text; lastAt = Date.now();
+        const id = idFromQR(text);
+        if (id) addToCart(id); else cartMsg("That QR code isn't a Jen Bags sticker.", true);
+      }
+    } catch(e){}
+    busyScan = false;
+  }, 250);
+}
+function openCart(firstId, withCam){
+  closeCart();
+  const wrap = el("div", "scanwrap"); wrap.id = "scanWrap";
+  const box = el("div", "scanbox"); wrap.appendChild(box);
+  const top = el("div", "chead"); top.append(el("p", "ptitle", "Sell bags"));
+  const xb = el("button", "pbtn", "Close"); xb.type = "button"; xb.onclick = closeCart; top.appendChild(xb);
+  const vid = el("video", "camvid"); vid.setAttribute("playsinline", ""); vid.muted = true; vid.autoplay = true; vid.hidden = true;
+  const msg = el("p", "cammsg");
+  const scanMore = el("button", "ghostbtn scanmore", "Scan a bag"); scanMore.type = "button";
+  const flash = el("button", "ghostbtn flashbtn", "Turn on flash"); flash.type = "button"; flash.hidden = true; flash.setAttribute("aria-pressed", "false");
+  const countEl = el("p", "ccount"); const list = el("ul", "clist");
+  const totRow = el("div", "ctotal"); const totalEl = el("b"); totRow.append(el("span", null, "Total"), totalEl);
+  const payArea = el("div");
+  let pay = CHOICES.includes(lastPay) && lastPay !== "Other" ? lastPay : "Cash";
+  const grp = el("div", "seg"); grp.setAttribute("role", "group"); grp.setAttribute("aria-label", "Payment method");
+  const olab = el("label", "fld"); olab.htmlFor = "scanOther"; olab.append(el("span", null, "Type the payment method"));
+  const other = el("input"); other.id = "scanOther"; other.type = "text"; other.maxLength = 40; other.placeholder = "e.g. Maya, bank transfer, card";
+  olab.appendChild(other); olab.hidden = true;
+  CHOICES.forEach(p => { const bt = el("button", null, p); bt.type = "button"; bt.setAttribute("aria-pressed", p === pay);
+    bt.onclick = () => { pay = p; grp.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === bt)); olab.hidden = p !== "Other"; if (p === "Other") other.focus(); };
+    grp.appendChild(bt); });
+  const nlab = el("label", "fld"); nlab.htmlFor = "scanNote"; nlab.append(el("span", null, "Note (optional)"));
+  const note = el("input"); note.id = "scanNote"; note.type = "text"; note.maxLength = 200; note.placeholder = "e.g. buyer name, GCash ref no."; nlab.appendChild(note);
+  const err = el("p", "perr"); err.setAttribute("aria-live", "polite");
+  const ok = el("button", "pbtn primary bigok", "Mark sold"); ok.type = "button";
+  payArea.append(totRow, el("span", "plabel", "Payment"), grp, olab, nlab, err, ok);
+  box.append(top, vid, flash, msg, scanMore, countEl, list, payArea);
+  document.body.appendChild(wrap);
+  cart = {items: [], vid, msg, list, totalEl, countEl, ok, payArea, scanMore, flash, camOn: false};
+  flash.onclick = async () => { const tr = camStream && camStream.getVideoTracks()[0]; if (!tr) return; const on = flash.getAttribute("aria-pressed") !== "true"; try { await tr.applyConstraints({advanced: [{torch: on}]}); flash.setAttribute("aria-pressed", String(on)); flash.textContent = on ? "Turn off flash" : "Turn on flash"; } catch(e){ flash.hidden = true; cartMsg("This phone doesn't let the website use the flash.", true); } };
+  scanMore.onclick = startCam;
+  ok.onclick = async () => {
+    if (!cart.items.length) return;
+    const bad = cart.items.find(it => it.price === "" || !(Number(it.price) >= 0));
+    if (bad){ err.textContent = "Type a price for Bag " + bagOf(bad.id).n + "."; return; }
+    const finalPay = pay === "Other" ? other.value.trim() : pay;
+    if (!finalPay){ err.textContent = "Type the payment method, or pick N/A."; other.focus(); return; }
+    err.textContent = "";
+    if (online){
+      ok.disabled = true; ok.textContent = "Checking…";
+      const ps = panel; panel = {}; try { await pull(); } catch(e){} panel = ps;
+      ok.disabled = false;
+      const taken = cart.items.filter(it => !state[it.id] || state[it.id].status !== "available");
+      if (taken.length){
+        cart.items = cart.items.filter(it => !taken.includes(it));
+        drawCart();
+        err.textContent = "Already sold on another phone, so taken off the list: " + taken.map(it => "Bag " + (bagOf(it.id) ? bagOf(it.id).n : "?")).join(", ") + ". Check the total, then tap again.";
+        return;
+      }
+    }
+    stopCamera();
+    const ids = cart.items.map(it => it.id), now = Date.now(), noteTxt = note.value.trim();
+    pushUndo(ids.length > 1 ? "Marked " + ids.length + " bags sold" : "Marked Bag " + bagOf(ids[0]).n + " sold", ids);
+    let total = 0;
+    cart.items.forEach(it => { const st = state[it.id]; st.price = Number(it.price); st.status = "sold"; st.soldAt = now; st.pay = finalPay; st.note = noteTxt; total += st.price; });
+    lastPay = finalPay; LSset("jb_lastpay", finalPay);
+    saveLocal(); render(); if (online) enqueue({action: "batch", ids});
+    const nums = ids.map(id => bagOf(id).n).join(", ");
+    box.replaceChildren(el("p", "scanmsg ok", "Sold! " + (ids.length > 1 ? ids.length + " bags" : "Bag " + nums) + " · " + peso(total) + " · " + finalPay));
+    if (ids.length > 1) box.appendChild(el("p", null, "Bags " + nums));
+    const row = el("div", "prow"); const nx = el("button", "pbtn primary", "Next buyer"); nx.type = "button"; nx.onclick = () => openCart("", true);
+    const cl = el("button", "pbtn", "Close"); cl.type = "button"; cl.onclick = closeCart; row.append(nx, cl); box.appendChild(row);
+    cart.items = [];
+  };
+  drawCart();
+  if (firstId) addToCart(firstId); else cartMsg("Point the camera at a bag's QR sticker.");
+  if (withCam) startCam(); else scanMore.textContent = "Scan another bag";
+}
+function openScan(final){
+  if (scanDone) return;
+  const id = scanParam(); if (!id){ scanDone = true; return; }
+  if (!bagOf(id) && !final) return;
+  scanDone = true; openCart(id, false);
+}
+// ---- Group price change ----
+function groupCounts(){
+  const from = Number($("gpFrom").value);
+  const n = $("gpFrom").value === "" ? 0 : BAGS.filter(b => state[b.id].status === "available" && state[b.id].price === from).length;
+  $("gpBtn").textContent = n ? "Change " + n + (n === 1 ? " bag" : " bags") : "Change prices";
+  return n;
+}
+function groupChange(){
+  const msg = $("gpMsg"), fr = $("gpFrom").value, to = $("gpTo").value;
+  const from = Number(fr), nw = Number(to);
+  if (fr === "" || !(from >= 0)){ msg.textContent = "Type the current price."; $("gpFrom").focus(); return; }
+  if (to === "" || !(nw >= 0)){ msg.textContent = "Type the new price."; $("gpTo").focus(); return; }
+  const list = BAGS.filter(b => state[b.id].status === "available" && state[b.id].price === from);
+  if (!list.length){ msg.textContent = "No unsold bags are priced " + peso(from) + "."; return; }
+  if (from === nw){ msg.textContent = "The new price is the same."; return; }
+  const ids = list.map(b => b.id);
+  pushUndo("Changed " + ids.length + " bags from " + peso(from) + " to " + peso(nw), ids);
+  list.forEach(b => { state[b.id].price = nw; });
+  saveLocal(); render(); if (online) enqueue({action: "batch", ids});
+  msg.textContent = "Changed " + ids.length + (ids.length === 1 ? " bag" : " bags") + " from " + peso(from) + " to " + peso(nw) + ": Bag " + list.map(b => b.n).join(", ") + ". Tap Undo to change them back.";
+  $("gpFrom").value = ""; $("gpTo").value = ""; groupCounts();
+}
+
+loadLocal();
+try { if (!LS("jb_paidsync")){ const ids = BAGS.filter(b => state[b.id].status === "sold" && state[b.id].paid).map(b => b.id); if (online && ids.length) enqueue({action: "batch", ids}); LSset("jb_paidsync", "1"); } } catch(e){}
+render(); openScan(false);
+
+// ---- Helper PIN: change it for everyone, or forget it on this phone ----
+function showPinState(){ const e = $("pinState"); if (e) e.textContent = pin ? "This phone has the PIN saved, so its changes save for everyone." : "This phone doesn't have the PIN. It will ask for it the next time you change something."; }
+$("pinChForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const msg = $("pcMsg"), old = $("pcOld").value.trim(), nw = $("pcNew").value.trim(), nw2 = $("pcNew2").value.trim();
+  if (!old){ msg.textContent = "Type the current PIN."; $("pcOld").focus(); return; }
+  if (nw.length < 4){ msg.textContent = "The new PIN needs at least 4 characters."; $("pcNew").focus(); return; }
+  if (nw !== nw2){ msg.textContent = "The two new PINs don't match. Type them again."; $("pcNew2").focus(); return; }
+  if (!online){ msg.textContent = "Not connected to the sheet, so the PIN can't be changed here."; return; }
+  $("pcBtn").disabled = true; msg.textContent = "Changing the PIN…";
+  try {
+    const r = await fetch(API_URL, {method: "POST", body: JSON.stringify({pin: old, action: "setpin", newpin: nw})}); const j = await r.json();
+    if (j.ok){ pin = nw; LSset("jb_pin", nw); $("pinChForm").reset(); $("pinChange").open = false; msg.textContent = ""; $("pfMsg").textContent = "PIN changed. Tell your helpers the new PIN. Their phones will ask for it once."; showPinState(); flush(); }
+    else msg.textContent = j.error === "pin" ? "The current PIN is wrong." : j.error === "short" ? "The new PIN needs at least 4 characters." : "The sheet didn't change the PIN. Try again.";
+  } catch(err){ msg.textContent = "No connection. Try again when you're online."; }
+  $("pcBtn").disabled = false;
+});
+$("pinForget").onclick = () => { pin = ""; LSset("jb_pin", ""); showPinState(); $("pfMsg").textContent = "This phone forgot the PIN. Changes made here won't save for everyone until someone types it again."; };
+$("pinForm").addEventListener("submit", () => setTimeout(showPinState, 0));
+showPinState();
+$("sortBy").value = sortMode;
+$("sortBy").onchange = () => { sortMode = $("sortBy").value; LSset("jb_sort", sortMode); render(); };
+
+// ---- Unsaved changes on this phone: see them, save them, or throw them away ----
+function describeChange(id, isDelete){
+  const b = bagOf(id), s = state[id], r = srvRows[id];
+  if (isDelete) return (r ? "Bag " + r.n + ": " : "") + "deleted" + (r ? " (" + r.name + ")" : "");
+  if (!b) return "A bag that's no longer here";
+  if (!r) return "Bag " + b.n + ": added on this phone (" + b.name + ", " + peso(s.price) + ")";
+  const out = [];
+  if (r.status !== s.status){
+    if (s.status === "sold") out.push("marked sold" + (s.pay ? ", " + s.pay : "") + ", " + peso(s.price));
+    else if (s.status === "removed") out.push("removed from the sale");
+    else out.push(r.status === "sold" ? "marked not sold" : "put back on sale");
+  } else {
+    if (r.price !== s.price) out.push("price " + peso(r.price) + " → " + peso(s.price));
+    if (s.status === "sold" && r.pay !== s.pay) out.push("payment " + (r.pay || "N/A") + " → " + (s.pay || "N/A"));
+  }
+  if ((r.paid || "") !== (s.paid || "")) out.push(s.paid ? "invoice marked paid" : "invoice marked unpaid");
+  if ((r.note || "") !== (s.note || "") && s.status !== "available") out.push("note changed");
+  if (r.n !== b.n) out.push("number " + r.n + " → " + b.n);
+  return "Bag " + b.n + ": " + (out.length ? out.join(", ") : "same as the sheet");
+}
+function pendingItems(){
+  const items = [], seen = new Set();
+  queue.forEach(q => { if (q.action === "delete"){ if (!seen.has("d" + q.id)){ seen.add("d" + q.id); items.push({id: q.id, del: true, at: q.at}); } } else q.ids.forEach(id => { if (!seen.has(id)){ seen.add(id); items.push({id, del: false, at: q.at}); } }); });
+  return items;
+}
+function showPending(){
+  const box = $("pendBox"); if (!box) return;
+  const items = pendingItems();
+  const waiting = items.length && (holdQueue || !pin || !navigator.onLine);
+  box.hidden = !waiting; if (!waiting) return;
+  const n = items.length;
+  $("pendTitle").textContent = n + (n === 1 ? " change on this phone isn't saved" : " changes on this phone aren't saved");
+  const old = items.some(it => !it.at || new Date(it.at).toDateString() !== new Date().toDateString());
+  $("pendCap").textContent = old ? (n === 1 ? "It's from an earlier day. Check it before it goes to the sheet." : "Some are from an earlier day. Check them before they go to the sheet.") : !pin ? "They'll save after you type the helper PIN." : "They'll save when you're back online.";
+  const ul = $("pendList"); ul.textContent = "";
+  items.forEach(it => {
+    const li = el("li"); li.appendChild(el("span", null, describeChange(it.id, it.del)));
+    if (it.at) li.appendChild(el("small", null, new Date(it.at).toLocaleString("en-PH", {month: "short", day: "numeric", hour: "numeric", minute: "2-digit"})));
+    const x = el("button", "pbtn", "Don't save"); x.type = "button"; x.onclick = () => dropPending([it.id]); li.appendChild(x);
+    ul.appendChild(li);
+  });
+  $("pendSave").textContent = n === 1 ? "Save this change" : "Save these changes";
+}
+async function dropPending(ids){
+  const set = new Set(ids);
+  queue = queue.map(q => q.action === "delete" ? (set.has(q.id) ? null : q) : {...q, ids: q.ids.filter(i => !set.has(i))}).filter(q => q && (q.action === "delete" || q.ids.length));
+  if (!queue.length) holdQueue = false;
+  saveLocal();
+  $("pendMsg").textContent = "Loading the sheet's copy…";
+  if (online && navigator.onLine){ await pull(); $("pendMsg").textContent = ids.length > 1 ? "Discarded. This phone now matches the sheet." : "Discarded that change."; }
+  else $("pendMsg").textContent = "Discarded. The sheet's copy loads when you're back online.";
+  render(); showPending();
+  if (!queue.length) setStatus("Up to date · " + timeNow());
+}
+$("pendSave").onclick = () => { holdQueue = false; $("pendMsg").textContent = ""; flush(); showPending(); };
+$("pendDrop").onclick = () => dropPending(pendingItems().map(it => it.id));
+window.addEventListener("online", showPending); window.addEventListener("offline", showPending);
+showPending();
+$("scanBtn").onclick = () => openCart("", true);
+$("gpFrom").addEventListener("input", groupCounts); $("gpBtn").onclick = groupChange;
+try { const v = localStorage.getItem("jb_view"); if (v === "vStats" || v === "vHelp") setView(v); } catch(e){}
+if (online){
+  setStatus("Loading from the sheet…"); pull().then(() => { flush(); openScan(true); });
+  setInterval(() => { if (document.visibilityState === "visible"){ flush(); pull(); } }, 8000);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible"){ flush(); pull(); } });
+} else {
+  setStatus("Not connected to a Google Sheet yet. Saving on this phone only."); openScan(true);
+}
+</script>
+</body>
+</html>
