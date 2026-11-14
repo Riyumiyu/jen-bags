@@ -691,6 +691,12 @@ header h1{padding-bottom:10px;background:repeating-linear-gradient(90deg,var(--s
 .pend li small{grid-column:1;color:var(--muted);font-size:13px}
 .pend li .pbtn{grid-column:2;grid-row:1/span 2;padding:6px 12px;font-size:14px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pend{background:linear-gradient(135deg,rgba(90,70,20,.6),rgba(60,48,20,.5))}:root:not([data-theme="light"]) .pend h2{color:#FFE3A0}:root:not([data-theme="light"]) .pend li{background:rgba(255,255,255,.08)}}
+
+body.locked header .bento,body.locked header .sub,body.locked header .pend,body.locked #undoLast,body.locked #vBags,body.locked #vStats,body.locked #vHelp,body.locked .views{display:none!important}
+body.locked .pin{display:block!important;margin-top:18px;padding:22px 20px;border-radius:26px!important;outline:1.5px dashed var(--stitch,rgba(214,38,150,.42));outline-offset:-8px}
+body.locked .pin p{color:var(--fg);font:700 18px/1.35 var(--display);margin:0 0 12px}
+body.locked .pin input{font-size:20px;letter-spacing:.2em}
+body.locked .status:empty{display:none}
 </style>
 
 </head>
@@ -1246,14 +1252,15 @@ function busy(){ const a = document.activeElement; return panel || (a && a.tagNa
 async function pull(){
   if (!online) return;
   try {
-    if (!pin){ showPin("Type the helper PIN to load the bags and save changes."); setStatus("Waiting for the helper PIN."); return; }
+    if (!pin){ lockUI(true); return; }
     const r = await fetch(API_URL, {method: "POST", body: JSON.stringify({pin, action: "list"})}); const j = await r.json();
     if (!j.ok){
-      if (j.error === "pin"){ pin = ""; LSset("jb_pin", ""); showPin("That PIN is wrong. Type the helper PIN again."); setStatus("Waiting for the helper PIN."); if (typeof showPinState === "function") showPinState(); }
+      if (j.error === "pin"){ pin = ""; LSset("jb_pin", ""); lockUI(true, "That PIN is wrong. Type the helper PIN again."); if (typeof showPinState === "function") showPinState(); }
       else if (j.error === "locked") setStatus("Too many wrong PINs were tried. Wait 10 minutes, then try again.");
       return;
     }
     const pending = pendingIds(), seen = new Set();
+    lockUI(false);
     srvRows = {}; (j.rows || []).forEach(v => { srvRows[v.id] = {n: v.n, name: v.name, tag: v.tag, price: v.price, status: normStatus(v), pay: v.pay || "", note: v.note || "", paid: v.paid || ""}; });
     LSset("jb_srv", JSON.stringify(srvRows));
     (j.rows || []).forEach(v => {
@@ -1724,7 +1731,7 @@ $("pinChForm").addEventListener("submit", async e => {
   } catch(err){ msg.textContent = "No connection. Try again when you're online."; }
   $("pcBtn").disabled = false;
 });
-$("pinForget").onclick = () => { pin = ""; LSset("jb_pin", ""); showPinState(); $("pfMsg").textContent = "This phone forgot the PIN. Changes made here won't save for everyone until someone types it again."; };
+$("pinForget").onclick = () => { pin = ""; LSset("jb_pin", ""); showPinState(); lockUI(true); $("pfMsg").textContent = "This phone forgot the PIN. Changes made here won't save for everyone until someone types it again."; };
 $("pinForm").addEventListener("submit", () => setTimeout(showPinState, 0));
 showPinState();
 $("sortBy").value = sortMode;
@@ -1788,6 +1795,13 @@ $("pendSave").onclick = () => { holdQueue = false; $("pendMsg").textContent = ""
 $("pendDrop").onclick = () => dropPending(pendingItems().map(it => it.id));
 window.addEventListener("online", showPending); window.addEventListener("offline", showPending);
 showPending();
+
+// ---- Locked until the PIN is entered: no stale list, no data on screen ----
+function lockUI(on, msg){
+  document.body.classList.toggle("locked", !!on);
+  if (on){ showPin(msg || "Type the helper PIN to open the tracker."); setStatus(""); try { $("pinIn").focus({preventScroll: true}); } catch(e){} }
+}
+if (!pin) lockUI(true);
 $("scanBtn").onclick = () => openCart("", true);
 $("gpFrom").addEventListener("input", groupCounts); $("gpBtn").onclick = groupChange;
 try { const v = localStorage.getItem("jb_view"); if (v === "vStats" || v === "vHelp") setView(v); } catch(e){}
