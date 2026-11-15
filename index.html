@@ -2203,6 +2203,19 @@ function openCartNow(firstId, withCam){
 function openScan(final){
   if (scanDone) return;
   const id = scanParam(); if (!id){ scanDone = true; return; }
+  const ids = id.split(",").map(x => x.trim()).filter(Boolean);
+  if (ids.length > 1){
+    if (!final && !ids.some(x => bagOf(x))) return;
+    scanDone = true;
+    let payP = ""; try { payP = new URLSearchParams(location.search).get("pay") || ""; } catch(e){}
+    if (CHOICES.includes(payP) && payP !== "Other") lastPay = payP;
+    openCart("", false, () => {
+      const missing = ids.filter(x => !bagOf(x)).length;
+      addManyToCart(ids.filter(x => bagOf(x)));
+      if (cart && missing) cartMsg(cart.msg.textContent + " " + missing + " code(s) in the link aren't in the tracker.", false, true);
+    });
+    return;
+  }
   if (!bagOf(id) && !final) return;
   scanDone = true; openCart(id, false);
 }
@@ -2316,7 +2329,7 @@ window.addEventListener("online", showPending); window.addEventListener("offline
 showPending();
 
 // ---- Auto-update: reload when a newer version of the site is published ----
-const APP_V = "2026-11-15-logo1";
+const APP_V = "2026-11-15-batch1";
 let lastVerCheck = 0;
 async function checkVersion(){
   if (location.protocol === "file:" || Date.now() - lastVerCheck < 5 * 60e3) return; lastVerCheck = Date.now();
