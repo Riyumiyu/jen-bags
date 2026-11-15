@@ -879,6 +879,77 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
 .listhead #listTitle{font:inherit!important;color:inherit!important}
 #vBags .gpwrap{margin:6px 0 12px!important}
 .ctl .hideold{min-width:0;max-width:100%}
+
+/* Recent changes table */
+.undobox{max-width:640px!important}
+.hsub{font:700 15px/1.3 var(--body);margin:14px 4px 8px;color:#1B2244}
+.htable{width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:-8px}
+.htable thead th{font:600 12.5px var(--body);color:#4B5478;text-align:left;padding:0 10px}
+.htable td{background:#fff;border-top:1px solid rgba(27,34,68,.12);border-bottom:1px solid rgba(27,34,68,.12);padding:10px;vertical-align:top}
+.htable td:first-child{border-left:1px solid rgba(27,34,68,.12);border-radius:16px 0 0 16px}
+.htable td:last-child{border-right:1px solid rgba(27,34,68,.12);border-radius:0 16px 16px 0}
+.hwhen{font:500 13px/1.35 var(--body);color:#4B5478;width:84px}
+.hlabel{font:700 15px/1.3 var(--body);color:#1B2244;margin-bottom:4px}
+.hlines{list-style:none;margin:0;padding:0;font:500 14px/1.45 var(--body);color:#2E3657}
+.hlines b{color:#C2187F;font-weight:700}
+.hact{width:1%;white-space:nowrap;text-align:right;vertical-align:middle!important}
+.htable thead .hact{width:1%}
+.uempty{font:500 15px var(--body);color:#4B5478;padding:14px 4px}
+@media (max-width:520px){
+ .htable thead{display:none}
+ .htable,.htable tbody,.htable tr,.htable td{display:block}
+ .htable{border-spacing:0;margin-top:0}
+ .htable tr{position:relative;background:#fff;border:1px solid rgba(27,34,68,.12);border-radius:16px;padding:10px 10px 10px 12px;margin-bottom:8px}
+ .htable td{background:none!important;border:0!important;border-radius:0!important;padding:0!important}
+ .hwhen{width:auto;margin-bottom:2px}
+ .hwhat{padding-right:84px!important}
+ .htable td.hact{position:absolute;top:10px;right:10px}
+}
+@media (prefers-color-scheme:dark){
+ :root:not([data-theme="light"]) .hsub,:root:not([data-theme="light"]) .hlabel{color:#F2F3FA}
+ :root:not([data-theme="light"]) .hlines{color:#DADFF0}
+ :root:not([data-theme="light"]) .hlines b{color:#FF8CCB}
+ :root:not([data-theme="light"]) .hwhen,:root:not([data-theme="light"]) .htable thead th,:root:not([data-theme="light"]) .uempty{color:#BFC5DD}
+ :root:not([data-theme="light"]) .htable td,:root:not([data-theme="light"]) .htable tr{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14)!important}
+ :root:not([data-theme="light"]) .htable td{background:rgba(255,255,255,.07)}
+}
+@media (prefers-color-scheme:dark) and (max-width:520px){:root:not([data-theme="light"]) .htable td{background:none}}
+:root[data-theme="dark"] .hsub,:root[data-theme="dark"] .hlabel{color:#F2F3FA}
+:root[data-theme="dark"] .hlines{color:#DADFF0}
+:root[data-theme="dark"] .hlines b{color:#FF8CCB}
+:root[data-theme="dark"] .hwhen,:root[data-theme="dark"] .uempty{color:#BFC5DD}
+:root[data-theme="dark"] .htable tr,:root[data-theme="dark"] .htable td{border-color:rgba(255,255,255,.14)!important}
+
+.hlines li{display:block!important;background:none!important;border:0!important;padding:0!important;margin:0 0 2px!important;border-radius:0!important;box-shadow:none!important;outline:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;clip-path:none!important}
+.hlines li::before,.hlines li::after{display:none!important}
+.hbody{min-width:0}
+.htable{table-layout:auto}
+.hwhat{min-width:0;word-break:break-word}
+@media (min-width:521px){.hwhen{width:96px}}
+
+@media (max-width:520px){
+ .htable tr{display:grid!important;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:start}
+ .htable td.hwhen{grid-column:1;grid-row:1}
+ .htable td.hwhat{grid-column:1;grid-row:2;padding-right:0!important}
+ .htable td.hact{position:static!important;grid-column:2;grid-row:1 / span 2;align-self:center;width:auto}
+ .htable{width:100%;box-sizing:border-box}
+}
+
+/* PIN check before selling */
+.gatebox{max-width:380px!important;margin-bottom:auto;margin-top:auto}
+.gatebox .ptitle{font:700 21px/1.2 var(--body);margin:0 4px 6px;color:#1B2244}
+.gatepin{display:block;width:100%;box-sizing:border-box;margin:4px 0 12px;padding:14px 16px;border-radius:16px;border:1.5px solid rgba(27,34,68,.22);background:#fff;color:#1B2244;font:700 24px/1 var(--body);letter-spacing:.3em;text-align:center}
+.gatepin:focus{outline:none;border-color:#E0219A;box-shadow:0 0 0 3px rgba(224,33,154,.18)}
+.gatebox .prow{display:flex;gap:8px}
+.gatebox .prow .pbtn{flex:1;padding:12px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gatebox .ptitle{color:#F2F3FA}:root:not([data-theme="light"]) .gatepin{background:rgba(255,255,255,.08);color:#F2F3FA;border-color:rgba(255,255,255,.22)}}
+:root[data-theme="dark"] .gatebox .ptitle{color:#F2F3FA}
+:root[data-theme="dark"] .gatepin{background:rgba(255,255,255,.08);color:#F2F3FA;border-color:rgba(255,255,255,.22)}
+/* Sort + Hide past sales: wrap to two full-width rows on narrow phones */
+.ctlrow{display:flex!important;flex-wrap:wrap;gap:8px}
+.ctlrow>.sortby,.ctlrow>.hideold{flex:1 1 auto;min-width:0}
+.ctl .sortby select{width:100%}
+.ctl .hideold{justify-content:flex-start}
 </style>
 
 </head>
@@ -904,7 +975,7 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
     </div>
     <div class="sub"><h2>If everything sells</h2><span>Total <strong id="sAll">₱0</strong></span><span>You keep (70%) <strong id="sAllNet">₱0</strong></span><span>30% cut taken <strong id="sAllCut">₱0</strong></span><span id="sTagWrap" hidden>Tag price total <strong id="sTag">₱0</strong></span><span id="sRemoved" class="subnote"></span></div>
     <div class="status" id="status" aria-live="polite"></div>
-    <button type="button" class="undolink" id="undoLast" hidden>↶ Undo last change</button>
+    <button type="button" class="undolink" id="undoLast" hidden>Recent changes</button>
     <form class="pin" id="pinForm" hidden>
       <div class="pinpop" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
         <img src="data:image/webp;base64,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" alt="" width="84" height="56">
@@ -1046,7 +1117,7 @@ body.locked .pickbar,body.locked .pickbtn{display:none!important}
       <h3>Fixing mistakes</h3>
       <ul>
         <li><b>Sell bags without scanning:</b> tap the box on a bag, or press and hold the bag. Then tap any other bags the buyer is taking, and tap <b>Mark sold</b> at the bottom. You can still change the prices and pick the payment before saving. Tap <b>Cancel</b> to stop picking.</li>
-        <li><b>Undo:</b> right after a change, tap <b>Undo</b> in the bar at the bottom. To undo older changes, tap <b>↶ Undo changes</b> under the totals. It lists the last 30 changes made on this phone in the past 3 days, even after you close the site. Undoing one change also undoes the newer ones above it.</li>
+        <li><b>Undo:</b> right after a change, tap <b>Undo</b> in the bar at the bottom. To see or undo older changes, tap <b>Recent changes</b> under the totals. It shows a table of the last 30 changes made on this phone in the past 3 days, like “Bag 4: price ₱250 → ₱200”. Undoing one change also undoes the newer ones above it. Undone changes move to an <b>Undone</b> list where you can tap <b>Redo</b> to bring them back.</li>
         <li><b>Wrong payment:</b> tap <b>Change payment</b> under a sold bag.</li>
         <li><b>Not really sold:</b> untick the box, then tap <b>Yes, unmark</b>.</li>
       </ul>
@@ -1394,48 +1465,75 @@ function drawPickBar(){
 function sellPicked(){
   const ids = BAGS.filter(b => picked.has(b.id)).sort((a, b) => a.n - b.n).map(b => b.id); if (!ids.length) return;
   setPickMode(false);
-  openCart("", false);
-  ids.forEach(id => addToCart(id, true)); drawCart();
-  cartMsg(ids.length + (ids.length === 1 ? " bag" : " bags") + " picked. Check the prices, pick the payment, then tap Mark sold.", false, true);
+  openCart("", false, () => {
+    ids.forEach(id => addToCart(id, true)); drawCart();
+    cartMsg(ids.length + (ids.length === 1 ? " bag" : " bags") + " picked. Check the prices, pick the payment, then tap Mark sold.", false, true);
+  });
 }
 // ---- Numbering ----
 const nextNum = () => Math.max(0, ...active().map(b => b.n)) + 1;
-// ---- Undo (kept on this phone for 3 days, last 30 changes) ----
+// ---- Recent changes: undo and redo (kept on this phone for 3 days, last 30 changes) ----
 const UNDO_KEEP = 3 * 864e5;
-let undoStack = [];
-try { undoStack = (JSON.parse(localStorage.getItem("jb_undo") || "[]") || []).filter(u => u && u.items && Date.now() - (u.at || 0) < UNDO_KEEP); } catch(e){ undoStack = []; }
+function loadStack(k){ try { return (JSON.parse(localStorage.getItem(k) || "[]") || []).filter(u => u && u.items && Date.now() - (u.at || 0) < UNDO_KEEP); } catch(e){ return []; } }
+let undoStack = loadStack("jb_undo"), redoStack = loadStack("jb_redo");
 let undoTimer;
+const stripImg = list => list && list.map(it => it.bag ? {...it, bag: {...it.bag, img: undefined}} : it);
 function saveUndo(){
-  try { LSset("jb_undo", JSON.stringify(undoStack.map(u => ({...u, items: u.items.map(it => it.bag ? {...it, bag: {...it.bag, img: undefined}} : it)})))); } catch(e){}
+  try {
+    LSset("jb_undo", JSON.stringify(undoStack.map(u => ({...u, items: stripImg(u.items), after: stripImg(u.after)}))));
+    LSset("jb_redo", JSON.stringify(redoStack.map(u => ({...u, items: stripImg(u.items), after: stripImg(u.after)}))));
+  } catch(e){}
 }
-function undoCount(){ $("undoLast").hidden = !undoStack.length; $("undoLast").textContent = undoStack.length > 1 ? "↶ Undo changes (" + undoStack.length + ")" : "↶ Undo last change"; }
+function snap(ids){ return ids.map(id => { const b = bagOf(id); return b ? {id, existed: true, bag: {...b, img: undefined}, st: {...state[id]}} : {id, existed: false}; }); }
+function undoCount(){ $("undoLast").hidden = false; $("undoLast").textContent = "↺ Recent changes" + (undoStack.length ? " (" + undoStack.length + ")" : ""); }
 function pushUndo(label, ids){
-  undoStack.push({label, at: Date.now(), items: ids.map(id => { const b = bagOf(id); return b ? {id, existed: true, bag: {...b}, st: {...state[id]}} : {id, existed: false}; })});
+  const e = {label, at: Date.now(), items: ids.map(id => { const b = bagOf(id); return b ? {id, existed: true, bag: {...b}, st: {...state[id]}} : {id, existed: false}; })};
+  undoStack.push(e);
   if (undoStack.length > 30) undoStack.shift();
+  redoStack = [];
+  queueMicrotask(() => { e.after = snap(ids); saveUndo(); });
   saveUndo(); showUndo(label);
 }
 function showUndo(label){
   $("undoText").textContent = label; $("undoBtn").hidden = false; $("undoBar").hidden = false; undoCount();
   clearTimeout(undoTimer); undoTimer = setTimeout(() => { $("undoBar").hidden = true; }, 9000);
 }
+function applySnap(items, saveIds){
+  items.forEach(it => {
+    if (!it.existed){
+      const i = BAGS.findIndex(b => b.id === it.id);
+      if (i >= 0){ BAGS.splice(i, 1); delete state[it.id]; saveIds.delete(it.id); if (online) enqueue({action: "delete", id: it.id}); }
+      return;
+    }
+    let b = bagOf(it.id);
+    if (!b){ b = {...it.bag}; if (!b.img) delete b.img; BAGS.push(b); } else { const keep = b.img; Object.assign(b, it.bag); if (!it.bag.img) b.img = keep; }
+    state[it.id] = {...it.st};
+    saveIds.add(it.id);
+  });
+}
+function finishApply(saveIds){
+  saveUndo(); panel = null; saveLocal(); render();
+  if (online && saveIds.size) enqueue({action: "batch", ids: [...saveIds]});
+}
 function undoSteps(k){
   const done = [], saveIds = new Set();
   for (let n = 0; n < k && undoStack.length; n++){
     const u = undoStack.pop(); done.push(u.label);
-    u.items.forEach(it => {
-      if (!it.existed){
-        const i = BAGS.findIndex(b => b.id === it.id);
-        if (i >= 0){ BAGS.splice(i, 1); delete state[it.id]; saveIds.delete(it.id); if (online) enqueue({action: "delete", id: it.id}); }
-        return;
-      }
-      let b = bagOf(it.id);
-      if (!b){ b = {...it.bag}; if (!b.img) delete b.img; BAGS.push(b); } else { const keep = b.img; Object.assign(b, it.bag); if (!it.bag.img) b.img = keep; }
-      state[it.id] = {...it.st};
-      saveIds.add(it.id);
-    });
+    if (!u.after) u.after = snap(u.items.map(it => it.id));
+    applySnap(u.items, saveIds);
+    redoStack.push(u);
   }
-  saveUndo(); panel = null; saveLocal(); render();
-  if (online && saveIds.size) enqueue({action: "batch", ids: [...saveIds]});
+  finishApply(saveIds);
+  return done;
+}
+function redoSteps(k){
+  const done = [], saveIds = new Set();
+  for (let n = 0; n < k && redoStack.length; n++){
+    const u = redoStack.pop(); done.push(u.label);
+    applySnap(u.after || [], saveIds);
+    undoStack.push(u);
+  }
+  finishApply(saveIds);
   return done;
 }
 function undo(){
@@ -1452,33 +1550,84 @@ function whenText(t){
   const y = new Date(now); y.setDate(now.getDate() - 1);
   return (d.toDateString() === y.toDateString() ? "Yesterday, " : d.toLocaleDateString([], {month: "short", day: "numeric"}) + ", ") + tm;
 }
+// What changed for each bag, before → after
+function changeLines(u){
+  const after = u.after || snap(u.items.map(it => it.id));
+  const am = {}; after.forEach(a => am[a.id] = a);
+  const out = [];
+  u.items.forEach(bf => {
+    const af = am[bf.id] || {id: bf.id, existed: false};
+    const B = bf.existed ? bf.bag : null, A = af.existed ? af.bag : null, bs = bf.st || {}, as = af.st || {};
+    const who = "Bag " + ((A || B) ? (A || B).n : "?");
+    const name = (A || B) ? (A || B).name : "";
+    const parts = [];
+    if (!B && A){ parts.push("added at " + peso(as.price)); }
+    else if (B && !A){ parts.push("deleted"); }
+    else if (B && A){
+      if (bs.status !== as.status){
+        if (as.status === "sold") parts.push("marked sold" + (as.pay ? " · " + as.pay : " · N/A") + " · " + peso(as.price));
+        else if (as.status === "removed") parts.push("removed from sale" + (as.note ? " (" + as.note + ")" : ""));
+        else parts.push(bs.status === "sold" ? "marked not sold" : "put back on sale");
+      } else {
+        if (bs.pay !== as.pay && as.status === "sold") parts.push("payment " + (bs.pay || "N/A") + " → " + (as.pay || "N/A"));
+      }
+      if (bs.price !== as.price && !(bs.status !== as.status && as.status === "sold")) parts.push("price " + peso(bs.price) + " → " + peso(as.price));
+      else if (bs.price !== as.price) parts.push("was " + peso(bs.price));
+      if ((bs.paid || "") !== (as.paid || "")) parts.push(as.paid ? "invoice paid " + as.paid : "invoice unpaid");
+      if ((bs.note || "") !== (as.note || "") && as.status !== "removed") parts.push("note “" + (bs.note || "—") + "” → “" + (as.note || "—") + "”");
+      if (B.name !== A.name) parts.push("renamed “" + B.name + "” → “" + A.name + "”");
+      if (B.n !== A.n) parts.push("number " + B.n + " → " + A.n);
+      if (B.tag !== A.tag) parts.push("tag " + peso(B.tag) + " → " + peso(A.tag));
+    }
+    out.push({who, name, text: parts.length ? parts.join(", ") : "no change"});
+  });
+  return out;
+}
 function openUndoList(){
   closeCart();
   const wrap = el("div", "scanwrap"); wrap.id = "undoWrap";
-  const box = el("div", "scanbox undobox"); box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "Undo changes"); wrap.appendChild(box);
-  const top = el("div", "chead"); top.append(el("p", "ptitle", "Undo changes"));
+  const box = el("div", "scanbox undobox"); box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "Recent changes"); wrap.appendChild(box);
+  const top = el("div", "chead"); top.append(el("p", "ptitle", "Recent changes"));
   const xb = el("button", "pbtn", "Close"); xb.type = "button"; top.appendChild(xb);
   const close = () => { wrap.remove(); document.removeEventListener("keydown", esc); };
   const esc = e => { if (e.key === "Escape") close(); };
   xb.onclick = close; wrap.onclick = e => { if (e.target === wrap) close(); }; document.addEventListener("keydown", esc);
   const msg = el("p", "cammsg");
-  const help = el("p", "chint", "Newest change is on top. Tapping Undo on a change also undoes every change above it.");
-  const ul = el("ul", "clist ulist");
-  const draw = () => {
-    ul.textContent = "";
-    if (!undoStack.length){ ul.appendChild(el("li", "uempty", "Nothing to undo on this phone.")); return; }
-    undoStack.slice().reverse().forEach((u, i) => {
-      const li = el("li", "citem urow");
-      const t = el("div", "cinfo"); t.append(el("div", "cname", u.label), el("div", "sn", u.at ? whenText(u.at) : "Earlier"));
-      const k = i + 1;
-      const bt = el("button", "pbtn" + (i === 0 ? " primary" : ""), k === 1 ? "Undo" : "Undo " + k);
-      bt.type = "button"; bt.setAttribute("aria-label", k === 1 ? "Undo " + u.label : "Undo this and the " + (k - 1) + " newer change" + (k > 2 ? "s" : ""));
-      bt.onclick = () => { const done = undoSteps(k); msg.className = "cammsg good"; msg.textContent = "Undid " + (done.length === 1 ? done[0] + "." : done.length + " changes."); undoCount(); $("undoBar").hidden = true; draw(); };
-      li.append(t, bt); ul.appendChild(li);
+  const help = el("p", "chint", "Changes made on this phone in the last 3 days. Newest is on top. Undo also undoes the changes above it. Redo brings an undone change back.");
+  const body = el("div", "hbody");
+  const table = (title, list, isRedo) => {
+    const sec = el("section", "hsec");
+    sec.appendChild(el("h3", "hsub", title));
+    const tb = el("table", "htable");
+    const th = el("thead"); const hr = el("tr"); hr.append(el("th", null, "When"), el("th", null, "What changed"), el("th", "hact", "")); th.appendChild(hr); tb.appendChild(th);
+    const bd = el("tbody");
+    list.slice().reverse().forEach((u, i) => {
+      const k = i + 1, tr = el("tr");
+      tr.appendChild(el("td", "hwhen", u.at ? whenText(u.at) : "Earlier"));
+      const td = el("td", "hwhat"); td.appendChild(el("div", "hlabel", u.label));
+      const ul = el("ul", "hlines");
+      changeLines(u).forEach(l => { const li = el("li"); li.append(el("b", null, l.who), document.createTextNode(" " + l.text)); if (l.name) li.title = l.name; ul.appendChild(li); });
+      td.appendChild(ul); tr.appendChild(td);
+      const ta = el("td", "hact");
+      const bt = el("button", "pbtn" + (i === 0 ? " primary" : ""), (isRedo ? "Redo" : "Undo") + (k > 1 ? " " + k : "")); bt.type = "button";
+      bt.setAttribute("aria-label", (isRedo ? "Redo " : "Undo ") + u.label + (k > 1 ? " and the " + (k - 1) + " above it" : ""));
+      bt.onclick = () => {
+        const done = isRedo ? redoSteps(k) : undoSteps(k);
+        msg.className = "cammsg good"; msg.textContent = (isRedo ? "Redid " : "Undid ") + (done.length === 1 ? done[0] + "." : done.length + " changes.");
+        undoCount(); $("undoBar").hidden = true; draw();
+      };
+      ta.appendChild(bt); tr.appendChild(ta); bd.appendChild(tr);
     });
+    tb.appendChild(bd); sec.appendChild(tb); return sec;
+  };
+  const draw = () => {
+    body.textContent = "";
+    if (!undoStack.length && !redoStack.length){ body.appendChild(el("p", "uempty", "No changes on this phone in the last 3 days.")); return; }
+    if (undoStack.length) body.appendChild(table("Changes", undoStack, false));
+    if (redoStack.length) body.appendChild(table("Undone", redoStack, true));
   };
   draw();
-  box.append(top, msg, help, ul);
+  box.append(top, msg, help, body);
   document.body.appendChild(wrap); xb.focus();
 }
 function removeBag(id, note, renumber){
@@ -1808,7 +1957,7 @@ $("pdfDate").value = dayKey(Date.now());
 $("pdfRange").addEventListener("change", () => { const v = $("pdfRange").value; $("pdfDate").value = v.startsWith("d:") ? v.slice(2) : dayKey(Date.now()); });
 $("pinForm").addEventListener("submit", e => {
   e.preventDefault(); const v = $("pinIn").value.trim(); if (!v) return;
-  pin = v; LSset("jb_pin", v); $("pinIn").value = ""; $("pinForm").hidden = true; pull().then(flush);
+  pin = v; LSset("jb_pin", v); pinOkAt = Date.now(); $("pinIn").value = ""; $("pinForm").hidden = true; pull().then(flush);
 });
 function shrinkPhoto(file){
   return new Promise(res => {
@@ -1934,7 +2083,40 @@ async function startCam(){
     busyScan = false;
   }, 250);
 }
-function openCart(firstId, withCam){
+// ---- Safeguard: type the helper PIN before selling ----
+let pinOkAt = 0, gateFails = 0, gateLockUntil = 0;
+function pinGate(fn){
+  if (!online || !pin || Date.now() - pinOkAt < 120000){ fn(); return; }
+  closeCart(); const old = $("gateWrap"); if (old) old.remove();
+  const wrap = el("div", "scanwrap"); wrap.id = "gateWrap";
+  const box = el("form", "scanbox gatebox"); box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-labelledby", "gateT"); box.noValidate = true; wrap.appendChild(box);
+  const t = el("p", "ptitle", "Type the helper PIN"); t.id = "gateT";
+  const sub = el("p", "chint", "Only helpers can mark bags sold. Type the PIN to start selling.");
+  const inp = el("input", "gatepin"); inp.type = "password"; inp.inputMode = "numeric"; inp.autocomplete = "off"; inp.maxLength = 20; inp.setAttribute("aria-label", "Helper PIN");
+  const msg = el("p", "cammsg");
+  const row = el("div", "prow");
+  const ok = el("button", "pbtn primary", "Start selling"); ok.type = "submit";
+  const no = el("button", "pbtn", "Cancel"); no.type = "button";
+  row.append(ok, no);
+  box.append(t, sub, inp, msg, row);
+  const close = () => { wrap.remove(); document.removeEventListener("keydown", esc); try { if (location.search) history.replaceState(null, "", location.pathname); } catch(e){} };
+  const esc = e => { if (e.key === "Escape") close(); };
+  no.onclick = close; document.addEventListener("keydown", esc);
+  box.onsubmit = e => {
+    e.preventDefault();
+    if (Date.now() < gateLockUntil){ msg.className = "cammsg warn"; msg.textContent = "Too many wrong tries. Wait a minute, then try again."; return; }
+    if (inp.value.trim() === pin){ gateFails = 0; pinOkAt = Date.now(); close(); fn(); return; }
+    gateFails++; inp.value = ""; inp.focus();
+    if (gateFails >= 5){ gateLockUntil = Date.now() + 60000; gateFails = 0; msg.className = "cammsg warn"; msg.textContent = "Too many wrong tries. Wait a minute, then try again."; }
+    else { msg.className = "cammsg warn"; msg.textContent = "That PIN is wrong. Try again."; }
+  };
+  document.body.appendChild(wrap); setTimeout(() => inp.focus(), 50);
+}
+function openCart(firstId, withCam, after, skipPin){
+  if (skipPin){ openCartNow(firstId, withCam); if (after) after(); return; }
+  pinGate(() => { openCartNow(firstId, withCam); if (after) after(); });
+}
+function openCartNow(firstId, withCam){
   closeCart();
   const wrap = el("div", "scanwrap"); wrap.id = "scanWrap";
   const box = el("div", "scanbox"); wrap.appendChild(box);
@@ -1994,7 +2176,7 @@ function openCart(firstId, withCam){
     const nums = ids.map(id => bagOf(id).n).join(", ");
     box.replaceChildren(el("p", "scanmsg ok", "Sold! " + (ids.length > 1 ? ids.length + " bags" : "Bag " + nums) + " · " + peso(total) + " · " + finalPay));
     if (ids.length > 1) box.appendChild(el("p", null, "Bags " + nums));
-    const row = el("div", "prow"); const nx = el("button", "pbtn primary", "Next buyer"); nx.type = "button"; nx.onclick = () => openCart("", true);
+    const row = el("div", "prow"); const nx = el("button", "pbtn primary", "Next buyer"); nx.type = "button"; nx.onclick = () => openCart("", true, null, true);
     const cl = el("button", "pbtn", "Close"); cl.type = "button"; cl.onclick = closeCart; row.append(nx, cl); box.appendChild(row);
     cart.items = [];
   };
@@ -2118,7 +2300,7 @@ window.addEventListener("online", showPending); window.addEventListener("offline
 showPending();
 
 // ---- Auto-update: reload when a newer version of the site is published ----
-const APP_V = "2026-11-15-ctl1";
+const APP_V = "2026-11-15-gate1";
 let lastVerCheck = 0;
 async function checkVersion(){
   if (location.protocol === "file:" || Date.now() - lastVerCheck < 5 * 60e3) return; lastVerCheck = Date.now();
